@@ -25,8 +25,9 @@ export const useEmployeesStore = defineStore('employees', {
       this.error = ''
       try {
         const { data } = await api.get('/employees', { params })
+        // Backend returns paginated: { data: [...], meta: { total, ... } }
         this.employees = data.data || data
-        return this.employees
+        return data
       } catch (err) {
         this.error =
           err.response?.data?.message || 'Failed to fetch employees.'
@@ -165,7 +166,7 @@ export const useEmployeesStore = defineStore('employees', {
       this.loading = true
       this.error = ''
       try {
-        const response = await api.get('/employees/export', {
+        const response = await api.get('/employees/export/download', {
           params,
           responseType: 'blob',
         })

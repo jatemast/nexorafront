@@ -140,11 +140,28 @@ async function handleLogout() {
 // Navigation Items
 // ---------------------------------------------------------------------------
 const navItems = [
+  // ─── Master / Super-Admin Items ───────────────────────────────────
+  {
+    label: 'Panel Maestro',
+    to: { name: 'MasterDashboard' },
+    icon: 'pi pi-crown',
+    match: ['MasterDashboard'],
+    masterOnly: true,
+  },
+  {
+    label: 'Empresas',
+    to: { name: 'MasterDashboard' },
+    icon: 'pi pi-building',
+    match: ['MasterDashboard'],
+    masterOnly: true,
+  },
+  // ─── Company Items (hidden when master is NOT impersonating) ──────
   {
     label: 'Dashboard',
     to: { name: 'Dashboard' },
     icon: 'pi pi-th-large',
     match: ['Dashboard'],
+    companyScoped: true,
   },
   {
     label: 'Empleados',
@@ -251,12 +268,21 @@ const navItems = [
   },
 ]
 
-// Filter navItems when master is impersonating — hide company-scoped items
+// Filter navItems based on user role:
+// - Master (not impersonating): show only masterOnly items
+// - Master (impersonating): show companyScoped items + impersonation banner
+// - Company user: show all non-masterOnly items
 const visibleNavItems = computed(() => {
-  if (authStore.isImpersonating) {
-    return navItems.filter((item) => !item.companyScoped)
+  if (authStore.isSuperAdmin) {
+    if (authStore.isImpersonating) {
+      // Impersonating: show company items
+      return navItems.filter((item) => !item.masterOnly)
+    }
+    // Master view: show only master items
+    return navItems.filter((item) => item.masterOnly)
   }
-  return navItems
+  // Company user: show company items
+  return navItems.filter((item) => !item.masterOnly)
 })
 
 const expandedMenu = ref(null)

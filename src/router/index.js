@@ -614,6 +614,19 @@ router.beforeEach((to, from, next) => {
     ? `${to.meta.title} | ${baseTitle}`
     : baseTitle
 
+  // --- Root redirect: Master → /admin, Company users → /dashboard ---
+  if (to.path === '/' && authStore.isAuthenticated) {
+    if (authStore.isSuperAdmin) {
+      return next({ name: 'MasterDashboard' })
+    }
+    return next({ name: 'Dashboard' })
+  }
+
+  // --- Master redirect: /dashboard → /admin for Super Admin ---
+  if (to.name === 'Dashboard' && authStore.isSuperAdmin) {
+    return next({ name: 'MasterDashboard' })
+  }
+
   // --- Authentication guard ---
   // Routes that require authentication redirect to /login if the user is not
   // logged in. The intended destination is preserved as a query parameter so
@@ -628,17 +641,14 @@ router.beforeEach((to, from, next) => {
   }
 
   // --- Guest-only guard ---
-  // Routes marked with `meta.guest` (login, register, forgot-password, etc.)
-  // redirect authenticated users to the dashboard.
+  // Redirect authenticated users: Master → /admin, Company users → /dashboard
   if (to.meta.guest && authStore.isAuthenticated) {
+    if (authStore.isSuperAdmin) {
+      return next({ name: 'MasterDashboard' })
+    }
     return next({ name: 'Dashboard' })
   }
 
-  // --- Role-based access guard ---
-  // Routes can specify an array of allowed roles via `meta.roles`. If the
-  // current user's role is not included, they are redirected to /dashboard.
-  // If the user object hasn't been loaded yet, the guard allows navigation
-  // (the store's `fetchUser` action should be called on app init).
   // --- Master-only guard ---
   if (to.meta.masterOnly && !authStore.isSuperAdmin) {
     return next({ name: 'Dashboard' })

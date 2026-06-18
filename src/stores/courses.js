@@ -145,7 +145,7 @@ export const useCoursesStore = defineStore('courses', {
       this.error = ''
       try {
         const { data } = await api.get('/course-categories')
-        this.categories = data.data || data
+        this.categories = data.categories || data.data || data
         return this.categories
       } catch (err) {
         this.error =

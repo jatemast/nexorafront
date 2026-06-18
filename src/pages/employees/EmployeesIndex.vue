@@ -89,12 +89,12 @@ const filteredEmployees = computed(() => {
     const q = searchQuery.value.trim().toLowerCase()
     list = list.filter(
       (e) =>
-        (e.name && e.name.toLowerCase().includes(q)) ||
-        (e.lastname && e.lastname.toLowerCase().includes(q)) ||
+        (e.first_name && e.first_name.toLowerCase().includes(q)) ||
+        (e.last_name && e.last_name.toLowerCase().includes(q)) ||
         (e.email && e.email.toLowerCase().includes(q)) ||
-        (e.position && e.position.toLowerCase().includes(q)) ||
-        (e.area && e.area.toLowerCase().includes(q)) ||
-        (e.document_number && e.document_number.toLowerCase().includes(q)),
+        (e.document_number && e.document_number.toLowerCase().includes(q)) ||
+        (e.user?.name && e.user.name.toLowerCase().includes(q)) ||
+        (e.user?.lastname && e.user.lastname.toLowerCase().includes(q)),
     )
   }
 
@@ -102,8 +102,10 @@ const filteredEmployees = computed(() => {
     const q = filterName.value.trim().toLowerCase()
     list = list.filter(
       (e) =>
-        (e.name && e.name.toLowerCase().includes(q)) ||
-        (e.lastname && e.lastname.toLowerCase().includes(q)),
+        (e.first_name && e.first_name.toLowerCase().includes(q)) ||
+        (e.last_name && e.last_name.toLowerCase().includes(q)) ||
+        (e.user?.name && e.user.name.toLowerCase().includes(q)) ||
+        (e.user?.lastname && e.user.lastname.toLowerCase().includes(q)),
     )
   }
 
@@ -114,12 +116,20 @@ const filteredEmployees = computed(() => {
 
   if (filterPosition.value.trim()) {
     const q = filterPosition.value.trim().toLowerCase()
-    list = list.filter((e) => e.position && e.position.toLowerCase().includes(q))
+    list = list.filter(
+      (e) =>
+        (e.position && e.position.toLowerCase().includes(q)) ||
+        (e.position?.name && e.position.name.toLowerCase().includes(q)),
+    )
   }
 
   if (filterArea.value.trim()) {
     const q = filterArea.value.trim().toLowerCase()
-    list = list.filter((e) => e.area && e.area.toLowerCase().includes(q))
+    list = list.filter(
+      (e) =>
+        (e.area && e.area.toLowerCase().includes(q)) ||
+        (e.area_info?.name && e.area_info.name.toLowerCase().includes(q)),
+    )
   }
 
   if (filterStatus.value !== null) {
@@ -360,9 +370,9 @@ function getStatusLabel(status) {
 }
 
 function employeeInitials(employee) {
-  const first = (employee.name || '').charAt(0)
-  const last = (employee.lastname || '').charAt(0)
-  return (first + last).toUpperCase() || '?'
+  const fn = employee.first_name || employee.name || ''
+  const ln = employee.last_name || employee.lastname || ''
+  return (fn.charAt(0) + ln.charAt(0)).toUpperCase() || '?'
 }
 
 function formatSalary(salary) {
@@ -411,17 +421,17 @@ onMounted(() => {
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h1 class="text-2xl font-bold text-surface-900 dark:text-surface-950 tracking-tight">
-          Employees
+          Empleados
         </h1>
         <p class="text-sm text-surface-500 dark:text-surface-500 mt-1">
-          Manage all employees in the learning platform
+          Gestiona todos los empleados de la plataforma
         </p>
       </div>
 
       <div class="flex items-center gap-2 flex-wrap">
         <Button
           icon="pi pi-download"
-          label="Export"
+          label="Exportar"
           severity="secondary"
           size="small"
           :disabled="!hasEmployees || loading"
@@ -429,14 +439,14 @@ onMounted(() => {
         />
         <Button
           icon="pi pi-upload"
-          label="Import"
+          label="Importar"
           severity="secondary"
           size="small"
           @click="openImportDialog"
         />
         <Button
           icon="pi pi-plus"
-          label="Add Employee"
+          label="Nuevo Empleado"
           severity="primary"
           size="small"
           @click="navigateToCreate"
@@ -615,7 +625,7 @@ onMounted(() => {
           @sort="onSort"
         >
           <!-- Employee Avatar + Name -->
-          <Column header="Employee" :sortable="true" sort-field="name" class="min-w-[220px]">
+          <Column header="Empleado" :sortable="true" sort-field="first_name" class="min-w-[220px]">
             <template #body="{ data }">
               <div class="flex items-center gap-3">
                 <Avatar
@@ -626,10 +636,10 @@ onMounted(() => {
                 />
                 <div class="min-w-0">
                   <p class="text-sm font-medium text-surface-800 dark:text-surface-600 truncate">
-                    {{ data.name }} {{ data.lastname }}
+                    {{ data.first_name }} {{ data.last_name }}
                   </p>
                   <p class="text-xs text-surface-400 dark:text-surface-500 truncate">
-                    {{ data.email }}
+                    {{ data.document_number }} — {{ data.email }}
                   </p>
                 </div>
               </div>
@@ -644,26 +654,35 @@ onMounted(() => {
             </template>
           </Column>
 
-          <!-- Position -->
-          <Column field="position" header="Position" :sortable="true" class="min-w-[140px]">
+          <!-- Documento -->
+          <Column field="document_number" header="Documento" :sortable="true" class="min-w-[130px]">
             <template #body="{ data }">
-              <span class="text-sm text-surface-700 dark:text-surface-600">
-                {{ data.position || '—' }}
+              <span class="text-sm text-surface-700 dark:text-surface-600 font-mono">
+                {{ data.document_number || '—' }}
               </span>
             </template>
           </Column>
 
-          <!-- Area -->
-          <Column field="area" header="Area" :sortable="true" class="min-w-[130px]">
+          <!-- Cargo -->
+          <Column field="position" header="Cargo" :sortable="true" class="min-w-[140px]">
             <template #body="{ data }">
               <span class="text-sm text-surface-700 dark:text-surface-600">
-                {{ data.area || '—' }}
+                {{ data.position?.name || data.position || '—' }}
               </span>
             </template>
           </Column>
 
-          <!-- Phone -->
-          <Column field="phone" header="Phone" :sortable="true" class="min-w-[140px]">
+          <!-- Departamento -->
+          <Column field="department" header="Depto" :sortable="true" class="min-w-[120px]">
+            <template #body="{ data }">
+              <span class="text-sm text-surface-700 dark:text-surface-600">
+                {{ data.department || '—' }}
+              </span>
+            </template>
+          </Column>
+
+          <!-- Teléfono -->
+          <Column field="phone" header="Teléfono" :sortable="true" class="min-w-[140px]">
             <template #body="{ data }">
               <span class="text-sm text-surface-700 dark:text-surface-600 font-mono">
                 {{ data.phone || '—' }}
@@ -671,8 +690,8 @@ onMounted(() => {
             </template>
           </Column>
 
-          <!-- Hire Date -->
-          <Column field="hire_date" header="Hire Date" :sortable="true" class="min-w-[130px]">
+          <!-- Fecha Contratación -->
+          <Column field="hire_date" header="Contratación" :sortable="true" class="min-w-[130px]">
             <template #body="{ data }">
               <span class="text-sm text-surface-700 dark:text-surface-600">
                 {{ formatDate(data.hire_date) }}
@@ -680,17 +699,8 @@ onMounted(() => {
             </template>
           </Column>
 
-          <!-- Salary -->
-          <Column field="salary" header="Salary" :sortable="true" class="min-w-[130px]">
-            <template #body="{ data }">
-              <span class="text-sm font-mono text-surface-700 dark:text-surface-600">
-                {{ formatSalary(data.salary) }}
-              </span>
-            </template>
-          </Column>
-
-          <!-- Status -->
-          <Column field="status" header="Status" :sortable="true" class="min-w-[110px]">
+          <!-- Estado -->
+          <Column field="status" header="Estado" :sortable="true" class="min-w-[110px]">
             <template #body="{ data }">
               <Tag
                 :value="getStatusLabel(data.status)"
@@ -700,8 +710,8 @@ onMounted(() => {
             </template>
           </Column>
 
-          <!-- Actions -->
-          <Column header="Actions" class="min-w-[130px]">
+          <!-- Acciones -->
+          <Column header="Acciones" class="min-w-[130px]">
             <template #body="{ data }">
               <div class="flex items-center gap-1">
                 <Button
