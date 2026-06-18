@@ -1,100 +1,96 @@
 <template>
-  <div class="p-6">
+  <div class="db-page">
+
     <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
+    <div class="db-header">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">Panel Maestro</h1>
-        <p class="text-gray-500">Administración global de la plataforma Nexora</p>
+        <h1 class="db-title">Panel Maestro</h1>
+        <p class="db-subtitle">Administración global de la plataforma Nexora</p>
+      </div>
+      <div class="db-date-badge">
+        <i class="pi pi-calendar"></i>
+        {{ currentMonthLabel }}
       </div>
     </div>
 
     <!-- Impersonation Banner -->
-    <div
-      v-if="authStore.isImpersonating"
-      class="bg-amber-50 border border-amber-300 rounded-lg p-4 mb-6 flex items-center justify-between"
-    >
-      <div class="flex items-center gap-3">
-        <i class="pi pi-eye text-amber-600 text-xl"></i>
+    <div v-if="authStore.isImpersonating" class="impersonation-banner">
+      <div class="impersonation-banner__left">
+        <span class="impersonation-banner__icon">
+          <i class="pi pi-eye"></i>
+        </span>
         <div>
-          <p class="font-medium text-amber-800">
+          <p class="impersonation-banner__title">
             Estás viendo como: {{ authStore.impersonatingCompany?.company_name }}
           </p>
-          <p class="text-sm text-amber-600">Los datos mostrados pertenecen a esta empresa.</p>
+          <p class="impersonation-banner__sub">Los datos mostrados pertenecen a esta empresa.</p>
         </div>
       </div>
-      <button
-        class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        @click="stopImpersonating"
-      >
-        <i class="pi pi-sign-out mr-2"></i> Volver al Panel Maestro
+      <button class="impersonation-banner__btn" @click="stopImpersonating">
+        <i class="pi pi-sign-out"></i> Volver al Panel Maestro
       </button>
     </div>
 
     <!-- KPIs -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <div v-for="kpi in kpisList" :key="kpi.key" class="bg-white rounded-xl shadow-sm border p-5">
-        <div class="flex items-center gap-3">
-          <span :class="kpi.bgClass" class="w-10 h-10 rounded-lg flex items-center justify-center">
-            <i :class="kpi.icon" :style="{ color: kpi.color }"></i>
-          </span>
-          <div>
-            <p class="text-2xl font-bold text-gray-900">{{ kpi.value }}</p>
-            <p class="text-sm text-gray-500">{{ kpi.label }}</p>
-          </div>
+    <div class="kpi-grid">
+      <div v-for="kpi in kpisList" :key="kpi.key" class="kpi-card">
+        <span class="kpi-card__icon" :style="{ background: kpi.bgColor }">
+          <i :class="kpi.icon" :style="{ color: kpi.color }"></i>
+        </span>
+        <div>
+          <p class="kpi-card__value">{{ kpi.value.toLocaleString() }}</p>
+          <p class="kpi-card__label">{{ kpi.label }}</p>
         </div>
       </div>
     </div>
 
     <!-- Top Companies Table -->
-    <div class="bg-white rounded-xl shadow-sm border overflow-hidden mb-6">
-      <div class="px-6 py-4 border-b flex justify-between items-center">
-        <h2 class="font-semibold text-gray-900">Empresas Destacadas</h2>
-        <router-link to="/admin/companies" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-          Ver todas <i class="pi pi-arrow-right ml-1 text-xs"></i>
+    <div class="db-card">
+      <div class="db-card__head">
+        <h2 class="db-card__title">Empresas destacadas</h2>
+        <router-link to="/admin/companies" class="db-card__link">
+          Ver todas <i class="pi pi-arrow-right"></i>
         </router-link>
       </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-gray-50">
+      <div class="db-table-wrap">
+        <table class="db-table">
+          <thead>
             <tr>
-              <th class="text-left px-6 py-3 font-medium text-gray-500">Empresa</th>
-              <th class="text-center px-6 py-3 font-medium text-gray-500">Usuarios</th>
-              <th class="text-center px-6 py-3 font-medium text-gray-500">Empleados</th>
-              <th class="text-center px-6 py-3 font-medium text-gray-500">Cursos</th>
-              <th class="text-center px-6 py-3 font-medium text-gray-500">Certificados</th>
-              <th class="text-center px-6 py-3 font-medium text-gray-500">Acción</th>
+              <th>Empresa</th>
+              <th class="text-center">Usuarios</th>
+              <th class="text-center">Empleados</th>
+              <th class="text-center">Cursos</th>
+              <th class="text-center">Certificados</th>
+              <th class="text-center">Acción</th>
             </tr>
           </thead>
           <tbody>
             <tr
               v-for="company in masterDashboard.top_companies"
               :key="company.id"
-              class="border-t hover:bg-gray-50"
+              class="db-table__row"
             >
-              <td class="px-6 py-4">
-                <div class="flex items-center gap-3">
+              <td>
+                <div class="company-cell">
                   <div
-                    class="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                    class="company-cell__avatar"
                     :style="{ backgroundColor: companyColor(company.id) }"
                   >
                     {{ company.name.charAt(0).toUpperCase() }}
                   </div>
                   <div>
-                    <p class="font-medium text-gray-900">{{ company.name }}</p>
-                    <p class="text-xs text-gray-400">{{ company.slug }}</p>
+                    <p class="company-cell__name">{{ company.name }}</p>
+                    <p class="company-cell__slug">{{ company.slug }}</p>
                   </div>
                 </div>
               </td>
-              <td class="text-center px-6 py-4">{{ company.users_count }}</td>
-              <td class="text-center px-6 py-4">{{ company.employees_count }}</td>
-              <td class="text-center px-6 py-4">{{ company.courses_count }}</td>
-              <td class="text-center px-6 py-4">{{ company.certificates_count }}</td>
-              <td class="text-center px-6 py-4">
-                <button
-                  class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                  @click="impersonateCompany(company)"
-                >
-                  <i class="pi pi-eye mr-1"></i> Ver como
+              <td class="text-center">{{ company.users_count }}</td>
+              <td class="text-center">{{ company.employees_count }}</td>
+              <td class="text-center">{{ company.courses_count }}</td>
+              <td class="text-center">{{ company.certificates_count }}</td>
+              <td class="text-center">
+                <button class="impersonate-btn" @click="impersonateCompany(company)">
+                  <i class="pi pi-eye"></i> Ver como
                 </button>
               </td>
             </tr>
@@ -103,30 +99,32 @@
       </div>
     </div>
 
-    <!-- Companies Registered Chart (placeholder) -->
-    <div class="bg-white rounded-xl shadow-sm border p-6">
-      <h2 class="font-semibold text-gray-900 mb-4">Registro de Empresas (últimos 12 meses)</h2>
-      <div v-if="hasRegistrations" class="flex items-end gap-2 h-48">
-        <div
-          v-for="(count, month) in masterDashboard.registrations_by_month"
-          :key="month"
-          class="flex-1 flex flex-col items-center gap-1"
-        >
-          <span class="text-xs font-medium text-gray-700">{{ count }}</span>
-          <div
-            class="w-full bg-blue-500 rounded-t-md transition-all"
-            :style="{ height: barHeight(count) }"
-          ></div>
-          <span class="text-xs text-gray-400 mt-1">{{ formatMonth(month) }}</span>
-        </div>
+    <!-- Registrations Chart -->
+    <div class="db-card">
+      <div class="db-card__head">
+        <h2 class="db-card__title">Registro de empresas — últimos 12 meses</h2>
       </div>
-      <p v-else class="text-gray-400 text-sm">No hay datos de registro disponibles.</p>
+      <div class="chart-area">
+        <div v-if="hasRegistrations" class="chart-bars">
+          <div
+            v-for="(count, month) in masterDashboard.registrations_by_month"
+            :key="month"
+            class="chart-col"
+          >
+            <span class="chart-col__val">{{ count }}</span>
+            <div class="chart-col__bar" :style="{ height: barHeight(count) }"></div>
+            <span class="chart-col__lbl">{{ formatMonth(month) }}</span>
+          </div>
+        </div>
+        <p v-else class="chart-empty">No hay datos de registro disponibles.</p>
+      </div>
     </div>
+
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useAdminStore } from '@/stores/admin'
@@ -139,6 +137,11 @@ const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'
 const companyColor = (id) => colors[id % colors.length]
 
 const masterDashboard = computed(() => adminStore.masterDashboard)
+
+const currentMonthLabel = computed(() => {
+  return new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
+})
+
 const hasRegistrations = computed(() => {
   const data = masterDashboard.value.registrations_by_month
   return data && Object.keys(data).length > 0
@@ -147,67 +150,67 @@ const hasRegistrations = computed(() => {
 const kpisList = computed(() => [
   {
     key: 'total_companies',
-    label: 'Total Empresas',
+    label: 'Total empresas',
     value: masterDashboard.value.kpis?.total_companies ?? 0,
     icon: 'pi pi-building',
-    color: '#3B82F6',
-    bgClass: 'bg-blue-50',
+    color: '#2563eb',
+    bgColor: '#eff6ff',
   },
   {
     key: 'active_companies',
     label: 'Activas',
     value: masterDashboard.value.kpis?.active_companies ?? 0,
     icon: 'pi pi-check-circle',
-    color: '#10B981',
-    bgClass: 'bg-green-50',
+    color: '#16a34a',
+    bgColor: '#f0fdf4',
   },
   {
     key: 'total_users',
     label: 'Usuarios',
     value: masterDashboard.value.kpis?.total_users ?? 0,
     icon: 'pi pi-users',
-    color: '#8B5CF6',
-    bgClass: 'bg-purple-50',
+    color: '#7c3aed',
+    bgColor: '#faf5ff',
   },
   {
     key: 'total_courses',
     label: 'Cursos',
     value: masterDashboard.value.kpis?.total_courses ?? 0,
     icon: 'pi pi-book',
-    color: '#F59E0B',
-    bgClass: 'bg-amber-50',
+    color: '#d97706',
+    bgColor: '#fffbeb',
   },
   {
     key: 'total_employees',
     label: 'Empleados',
     value: masterDashboard.value.kpis?.total_employees ?? 0,
     icon: 'pi pi-id-card',
-    color: '#EC4899',
-    bgClass: 'bg-pink-50',
+    color: '#a21caf',
+    bgColor: '#fdf4ff',
   },
   {
     key: 'total_evaluations',
     label: 'Evaluaciones',
     value: masterDashboard.value.kpis?.total_evaluations ?? 0,
     icon: 'pi pi-file-edit',
-    color: '#06B6D4',
-    bgClass: 'bg-cyan-50',
+    color: '#0891b2',
+    bgColor: '#ecfeff',
   },
   {
     key: 'total_certificates',
     label: 'Certificados',
     value: masterDashboard.value.kpis?.total_certificates ?? 0,
     icon: 'pi pi-verified',
-    color: '#84CC16',
-    bgClass: 'bg-lime-50',
+    color: '#65a30d',
+    bgColor: '#f7fee7',
   },
   {
     key: 'inactive_companies',
     label: 'Inactivas',
     value: masterDashboard.value.kpis?.inactive_companies ?? 0,
     icon: 'pi pi-ban',
-    color: '#EF4444',
-    bgClass: 'bg-red-50',
+    color: '#e11d48',
+    bgColor: '#fff1f2',
   },
 ])
 
@@ -217,7 +220,7 @@ function barHeight(count) {
 }
 
 function formatMonth(month) {
-  const [y, m] = month.split('-')
+  const [, m] = month.split('-')
   const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
   return months[parseInt(m) - 1]
 }
@@ -245,3 +248,358 @@ onMounted(async () => {
   await adminStore.fetchCompanies({ per_page: 5 })
 })
 </script>
+
+<style scoped>
+/* ============================================================
+   Page layout
+============================================================ */
+.db-page {
+  padding: 24px;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   Header
+============================================================ */
+.db-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.db-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.db-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 3px;
+}
+
+.db-date-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #e0f2fe;
+  color: #075985;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+  text-transform: capitalize;
+}
+
+/* ============================================================
+   Impersonation banner
+============================================================ */
+.impersonation-banner {
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.impersonation-banner__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.impersonation-banner__icon {
+  width: 38px;
+  height: 38px;
+  background: #fef3c7;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d97706;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.impersonation-banner__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #92400e;
+  margin: 0;
+}
+
+.impersonation-banner__sub {
+  font-size: 12px;
+  color: #b45309;
+  margin: 2px 0 0;
+}
+
+.impersonation-banner__btn {
+  background: #d97706;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.impersonation-banner__btn:hover {
+  background: #b45309;
+}
+
+/* ============================================================
+   KPI grid
+============================================================ */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1024px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.kpi-card {
+  background: white;
+  border-radius: 12px;
+  border: 0.5px solid #e2e8f0;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kpi-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.kpi-card__value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1;
+  margin: 0;
+}
+
+.kpi-card__label {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+  margin: 4px 0 0;
+}
+
+/* ============================================================
+   Shared card shell
+============================================================ */
+.db-card {
+  background: white;
+  border-radius: 12px;
+  border: 0.5px solid #e2e8f0;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.db-card__head {
+  padding: 16px 20px;
+  border-bottom: 0.5px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.db-card__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
+
+.db-card__link {
+  font-size: 12px;
+  color: #2563eb;
+  font-weight: 500;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.db-card__link:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================
+   Table
+============================================================ */
+.db-table-wrap {
+  overflow-x: auto;
+}
+
+.db-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.db-table thead tr {
+  background: #f8fafc;
+}
+
+.db-table th {
+  padding: 10px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+}
+
+.db-table th.text-center {
+  text-align: center;
+}
+
+.db-table td {
+  padding: 13px 16px;
+  color: #334155;
+  border-top: 0.5px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.db-table td.text-center {
+  text-align: center;
+  font-weight: 600;
+}
+
+.db-table__row:hover td {
+  background: #f8fafc;
+}
+
+/* Company cell */
+.company-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.company-cell__avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.company-cell__name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
+
+.company-cell__slug {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 2px 0 0;
+}
+
+/* Impersonate button */
+.impersonate-btn {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: none;
+  border-radius: 7px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.15s;
+}
+
+.impersonate-btn:hover {
+  background: #dbeafe;
+}
+
+/* ============================================================
+   Registrations chart
+============================================================ */
+.chart-area {
+  padding: 20px;
+}
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 160px;
+}
+
+.chart-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.chart-col__val {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.chart-col__bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: #2563eb;
+  min-height: 4px;
+  transition: height 0.3s ease;
+}
+
+.chart-col__lbl {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+.chart-empty {
+  font-size: 13px;
+  color: #94a3b8;
+}
+</style>
