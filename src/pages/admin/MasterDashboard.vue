@@ -72,7 +72,14 @@
             >
               <td>
                 <div class="company-cell">
+                  <img
+                    v-if="company.logo"
+                    :src="company.logo"
+                    :alt="company.name"
+                    class="company-cell__logo"
+                  />
                   <div
+                    v-else
                     class="company-cell__avatar"
                     :style="{ backgroundColor: companyColor(company.id) }"
                   >
@@ -506,6 +513,14 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.company-cell__logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .company-cell__avatar {
