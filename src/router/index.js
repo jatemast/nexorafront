@@ -165,7 +165,7 @@ const routes = [
         meta: {
           title: 'Employees',
           breadcrumb: 'Employees',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       {
@@ -175,7 +175,7 @@ const routes = [
         meta: {
           title: 'Create Employee',
           breadcrumb: 'Create Employee',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       {
@@ -185,7 +185,7 @@ const routes = [
         meta: {
           title: 'Edit Employee',
           breadcrumb: 'Edit Employee',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
 
@@ -206,7 +206,7 @@ const routes = [
         meta: {
           title: 'Create Course',
           breadcrumb: 'Create Course',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       {
@@ -225,7 +225,7 @@ const routes = [
         meta: {
           title: 'Edit Course',
           breadcrumb: 'Edit Course',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       {
@@ -235,7 +235,7 @@ const routes = [
         meta: {
           title: 'Course Categories',
           breadcrumb: 'Course Categories',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
 
@@ -256,7 +256,7 @@ const routes = [
         meta: {
           title: 'Create Microlearning',
           breadcrumb: 'Create Microlearning',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       {
@@ -266,7 +266,7 @@ const routes = [
         meta: {
           title: 'Assign Microlearning',
           breadcrumb: 'Assign Microlearning',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
 
@@ -287,7 +287,7 @@ const routes = [
         meta: {
           title: 'Create Question',
           breadcrumb: 'Create Question',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       {
@@ -297,7 +297,7 @@ const routes = [
         meta: {
           title: 'Edit Question',
           breadcrumb: 'Edit Question',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       {
@@ -307,7 +307,7 @@ const routes = [
         meta: {
           title: 'Question Categories',
           breadcrumb: 'Question Categories',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
 
@@ -328,7 +328,7 @@ const routes = [
         meta: {
           title: 'Create Evaluation',
           breadcrumb: 'Create Evaluation',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       {
@@ -338,7 +338,7 @@ const routes = [
         meta: {
           title: 'Edit Evaluation',
           breadcrumb: 'Edit Evaluation',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       {
@@ -377,7 +377,7 @@ const routes = [
         meta: {
           title: 'Certificate Templates',
           breadcrumb: 'Certificate Templates',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       {
@@ -387,7 +387,7 @@ const routes = [
         meta: {
           title: 'Create Certificate Template',
           breadcrumb: 'Create Certificate Template',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       {
@@ -397,7 +397,7 @@ const routes = [
         meta: {
           title: 'Edit Certificate Template',
           breadcrumb: 'Edit Certificate Template',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       // --- Organizational ---
@@ -408,7 +408,7 @@ const routes = [
         meta: {
           title: 'Organigrama',
           breadcrumb: 'Organigrama',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       {
@@ -418,7 +418,7 @@ const routes = [
         meta: {
           title: 'Sucursales',
           breadcrumb: 'Sucursales',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       {
@@ -428,7 +428,7 @@ const routes = [
         meta: {
           title: 'Áreas',
           breadcrumb: 'Áreas',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       {
@@ -438,7 +438,7 @@ const routes = [
         meta: {
           title: 'Procesos',
           breadcrumb: 'Procesos',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       {
@@ -448,7 +448,7 @@ const routes = [
         meta: {
           title: 'Cargos',
           breadcrumb: 'Cargos',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
 
@@ -469,7 +469,7 @@ const routes = [
         meta: {
           title: 'Subir Documento',
           breadcrumb: 'Subir Documento',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       {
@@ -479,7 +479,7 @@ const routes = [
         meta: {
           title: 'Asignar Documento',
           breadcrumb: 'Asignar Documento',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
 
@@ -529,7 +529,7 @@ const routes = [
         meta: {
           title: 'Programaciones WhatsApp',
           breadcrumb: 'Programaciones WhatsApp',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
       {
@@ -539,7 +539,7 @@ const routes = [
         meta: {
           title: 'Historial WhatsApp',
           breadcrumb: 'Historial WhatsApp',
-          roles: ['admin'],
+          roles: ['Administrador Empresa', 'Super Administrador'],
         },
       },
 

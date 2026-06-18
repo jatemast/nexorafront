@@ -107,7 +107,39 @@ export const useEmployeesStore = defineStore('employees', {
     },
 
     /**
-     * Delete an employee by ID.
+     * Toggle the status of an employee (active ⇄ inactive).
+     * @param {number|string} id
+     * @param {string} currentStatus — 'active' | 'inactive' | 'suspended'
+     */
+    async toggleStatus(id, currentStatus) {
+      this.loading = true
+      this.error = ''
+      try {
+        const newStatus = currentStatus === 'active' ? 'inactive' : 'active'
+        const { data } = await api.put(`/employees/${id}`, { status: newStatus })
+        const updated = data.data || data.employee || data
+
+        // Update in the list
+        const index = this.employees.findIndex((e) => e.id === id)
+        if (index !== -1) {
+          this.employees[index] = { ...this.employees[index], status: newStatus }
+        }
+        // Update single employee if loaded
+        if (this.employee && this.employee.id === id) {
+          this.employee = { ...this.employee, status: newStatus }
+        }
+        return updated
+      } catch (err) {
+        this.error =
+          err.response?.data?.message || `Failed to toggle employee #${id}.`
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    /**
+     * Delete an employee by ID (soft delete — uses Laravel SoftDeletes).
      * @param {number|string} id
      */
     async delete(id) {

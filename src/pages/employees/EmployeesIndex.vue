@@ -56,9 +56,17 @@ const statusOptions = [
   { label: 'Inactive', value: 'inactive' },
 ]
 
+// Toggle status tracking
+const togglingId = ref(null)
+
 // Delete confirmation target
 const deletingId = ref(null)
 const deletingName = ref('')
+
+// View employee details dialog
+const viewDialogVisible = ref(false)
+const viewingEmployee = ref(null)
+const viewingLoading = ref(false)
 
 // Debounce timer for search
 let searchTimer = null
@@ -289,11 +297,11 @@ function confirmDelete(id, name) {
   deletingName.value = name
 
   confirm.require({
-    message: `Are you sure you want to delete "${name}"? This action cannot be undone.`,
-    header: 'Delete Employee',
+    message: `¿Está seguro de que desea eliminar a "${name}"? Esta acción utiliza borrado lógico y se puede restaurar.`,
+    header: 'Eliminar Empleado',
     icon: 'pi pi-exclamation-triangle',
-    rejectLabel: 'Cancel',
-    acceptLabel: 'Delete',
+    rejectLabel: 'Cancelar',
+    acceptLabel: 'Eliminar',
     acceptClass: 'p-button-danger',
     accept: () => handleDelete(id),
     reject: () => {
@@ -308,8 +316,8 @@ async function handleDelete(id) {
     await employeesStore.delete(id)
     toast.add({
       severity: 'success',
-      summary: 'Deleted',
-      detail: `Employee "${deletingName.value}" has been deleted.`,
+      summary: 'Eliminado',
+      detail: `Empleado "${deletingName.value}" eliminado exitosamente.`,
       life: 4000,
     })
     deletingId.value = null
@@ -323,13 +331,68 @@ async function handleDelete(id) {
       'Failed to delete employee.'
     toast.add({
       severity: 'error',
-      summary: 'Delete Failed',
+      summary: 'Error al eliminar',
       detail: message,
       life: 6000,
     })
     deletingId.value = null
     deletingName.value = ''
   }
+}
+
+async function toggleStatus(employee) {
+  togglingId.value = employee.id
+  try {
+    await employeesStore.toggleStatus(employee.id, employee.status)
+    const newStatus = employee.status === 'active' ? 'inactive' : 'active'
+    toast.add({
+      severity: 'success',
+      summary: 'Estado actualizado',
+      detail: `Empleado ${newStatus === 'active' ? 'activado' : 'desactivado'} exitosamente.`,
+      life: 3000,
+    })
+  } catch (err) {
+    const message =
+      err.response?.data?.message ||
+      employeesStore.error ||
+      'Failed to toggle employee status.'
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: message,
+      life: 5000,
+    })
+  } finally {
+    togglingId.value = null
+  }
+}
+
+async function viewDetails(employee) {
+  viewingEmployee.value = employee
+  viewDialogVisible.value = true
+  viewingLoading.value = true
+  try {
+    await employeesStore.fetchOne(employee.id)
+    viewingEmployee.value = employeesStore.employee
+  } catch (err) {
+    const message =
+      err.response?.data?.message ||
+      employeesStore.error ||
+      'Failed to load employee details.'
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: message,
+      life: 5000,
+    })
+  } finally {
+    viewingLoading.value = false
+  }
+}
+
+function closeViewDialog() {
+  viewDialogVisible.value = false
+  viewingEmployee.value = null
 }
 
 function onImportSuccess() {
@@ -711,17 +774,48 @@ onMounted(() => {
           </Column>
 
           <!-- Acciones -->
-          <Column header="Acciones" class="min-w-[130px]">
+          <Column header="Acciones" class="min-w-[210px]">
             <template #body="{ data }">
               <div class="flex items-center gap-1">
+                <Button
+                  icon="pi pi-eye"
+                  severity="info"
+                  text
+                  rounded
+                  size="small"
+                  v-tooltip.top="'Ver información completa'"
+                  @click="viewDetails(data)"
+                />
                 <Button
                   icon="pi pi-pencil"
                   severity="secondary"
                   text
                   rounded
                   size="small"
-                  v-tooltip.top="'Edit'"
+                  v-tooltip.top="'Editar'"
                   @click="navigateToEdit(data.id)"
+                />
+                <Button
+                  v-if="data.status === 'active'"
+                  icon="pi pi-ban"
+                  severity="warn"
+                  text
+                  rounded
+                  size="small"
+                  v-tooltip.top="'Desactivar'"
+                  :loading="togglingId === data.id"
+                  @click="toggleStatus(data)"
+                />
+                <Button
+                  v-else
+                  icon="pi pi-check-circle"
+                  severity="success"
+                  text
+                  rounded
+                  size="small"
+                  v-tooltip.top="'Activar'"
+                  :loading="togglingId === data.id"
+                  @click="toggleStatus(data)"
                 />
                 <Button
                   icon="pi pi-trash"
@@ -729,9 +823,9 @@ onMounted(() => {
                   text
                   rounded
                   size="small"
-                  v-tooltip.top="'Delete'"
+                  v-tooltip.top="'Eliminar'"
                   :loading="deletingId === data.id"
-                  @click="confirmDelete(data.id, (data.name + ' ' + data.lastname).trim())"
+                  @click="confirmDelete(data.id, `${data.first_name || ''} ${data.last_name || ''}`.trim())"
                 />
               </div>
             </template>
@@ -739,6 +833,135 @@ onMounted(() => {
         </DataTable>
       </div>
     </template>
+
+    <!-- =================================================================== -->
+    <!-- EMPLOYEE DETAIL DIALOG                                               -->
+    <!-- =================================================================== -->
+    <Dialog
+      v-model:visible="viewDialogVisible"
+      :header="viewingEmployee ? `Empleado: ${viewingEmployee.first_name || ''} ${viewingEmployee.last_name || ''}` : 'Detalles del Empleado'"
+      :modal="true"
+      :closable="true"
+      :draggable="false"
+      class="w-full max-w-2xl"
+      :pt="{
+        root: { class: '!rounded-2xl !shadow-2xl !border-surface-200 dark:!border-surface-200' },
+        header: { class: '!text-lg !font-semibold !text-surface-900 dark:!text-surface-950 !px-6 !pt-6 !pb-4' },
+        content: { class: '!px-6 !pb-6' },
+      }"
+      @hide="closeViewDialog"
+    >
+      <div v-if="viewingLoading" class="flex items-center justify-center py-12">
+        <i class="pi pi-spin pi-spinner text-2xl text-primary-500" />
+      </div>
+      <div v-else-if="viewingEmployee" class="space-y-6">
+        <!-- Personal Info -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-semibold text-surface-700 dark:text-surface-500 uppercase tracking-wide">
+            <i class="pi pi-user mr-2" />Información Personal
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <span class="text-xs text-surface-400 dark:text-surface-500">Nombre</span>
+              <p class="text-sm font-medium text-surface-800 dark:text-surface-600">{{ viewingEmployee.first_name || '—' }} {{ viewingEmployee.last_name || '—' }}</p>
+            </div>
+            <div>
+              <span class="text-xs text-surface-400 dark:text-surface-500">Documento</span>
+              <p class="text-sm font-medium text-surface-800 dark:text-surface-600">{{ viewingEmployee.document_type || '' }} {{ viewingEmployee.document_number || '—' }}</p>
+            </div>
+            <div>
+              <span class="text-xs text-surface-400 dark:text-surface-500">Email</span>
+              <p class="text-sm font-medium text-surface-800 dark:text-surface-600">{{ viewingEmployee.email || '—' }}</p>
+            </div>
+            <div>
+              <span class="text-xs text-surface-400 dark:text-surface-500">Teléfono</span>
+              <p class="text-sm font-medium text-surface-800 dark:text-surface-600">{{ viewingEmployee.phone || '—' }}</p>
+            </div>
+            <div>
+              <span class="text-xs text-surface-400 dark:text-surface-500">Género</span>
+              <p class="text-sm font-medium text-surface-800 dark:text-surface-600">{{ viewingEmployee.gender || '—' }}</p>
+            </div>
+            <div>
+              <span class="text-xs text-surface-400 dark:text-surface-500">Fecha de Nacimiento</span>
+              <p class="text-sm font-medium text-surface-800 dark:text-surface-600">{{ formatDate(viewingEmployee.birth_date) }}</p>
+            </div>
+            <div>
+              <span class="text-xs text-surface-400 dark:text-surface-500">Dirección</span>
+              <p class="text-sm font-medium text-surface-800 dark:text-surface-600">{{ viewingEmployee.address || '—' }}</p>
+            </div>
+            <div>
+              <span class="text-xs text-surface-400 dark:text-surface-500">Ciudad</span>
+              <p class="text-sm font-medium text-surface-800 dark:text-surface-600">{{ viewingEmployee.city || '—' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Employment Info -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-semibold text-surface-700 dark:text-surface-500 uppercase tracking-wide">
+            <i class="pi pi-briefcase mr-2" />Información Laboral
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <span class="text-xs text-surface-400 dark:text-surface-500">Cargo</span>
+              <p class="text-sm font-medium text-surface-800 dark:text-surface-600">{{ viewingEmployee.position?.name || viewingEmployee.position || '—' }}</p>
+            </div>
+            <div>
+              <span class="text-xs text-surface-400 dark:text-surface-500">Departamento</span>
+              <p class="text-sm font-medium text-surface-800 dark:text-surface-600">{{ viewingEmployee.department || '—' }}</p>
+            </div>
+            <div>
+              <span class="text-xs text-surface-400 dark:text-surface-500">Área</span>
+              <p class="text-sm font-medium text-surface-800 dark:text-surface-600">{{ viewingEmployee.area || viewingEmployee.area_info?.name || '—' }}</p>
+            </div>
+            <div>
+              <span class="text-xs text-surface-400 dark:text-surface-500">Estado</span>
+              <p>
+                <Tag
+                  :value="getStatusLabel(viewingEmployee.status)"
+                  :severity="getStatusSeverity(viewingEmployee.status)"
+                  class="!text-xs !font-medium"
+                />
+              </p>
+            </div>
+            <div>
+              <span class="text-xs text-surface-400 dark:text-surface-500">Fecha de Contratación</span>
+              <p class="text-sm font-medium text-surface-800 dark:text-surface-600">{{ formatDate(viewingEmployee.hire_date) }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emergency Contact -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-semibold text-surface-700 dark:text-surface-500 uppercase tracking-wide">
+            <i class="pi pi-phone mr-2" />Contacto de Emergencia
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <span class="text-xs text-surface-400 dark:text-surface-500">Nombre</span>
+              <p class="text-sm font-medium text-surface-800 dark:text-surface-600">{{ viewingEmployee.emergency_contact || '—' }}</p>
+            </div>
+            <div>
+              <span class="text-xs text-surface-400 dark:text-surface-500">Teléfono</span>
+              <p class="text-sm font-medium text-surface-800 dark:text-surface-600">{{ viewingEmployee.emergency_phone || '—' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div v-if="viewingEmployee.notes" class="space-y-3">
+          <h3 class="text-sm font-semibold text-surface-700 dark:text-surface-500 uppercase tracking-wide">
+            <i class="pi pi-pencil mr-2" />Notas
+          </h3>
+          <p class="text-sm text-surface-600 dark:text-surface-500 bg-surface-50 dark:bg-surface-100 rounded-lg p-3">
+            {{ viewingEmployee.notes }}
+          </p>
+        </div>
+      </div>
+      <div v-else class="flex items-center justify-center py-12">
+        <p class="text-sm text-surface-500 dark:text-surface-500">No se pudo cargar la información del empleado.</p>
+      </div>
+    </Dialog>
 
     <!-- =================================================================== -->
     <!-- IMPORT DIALOG                                                       -->
