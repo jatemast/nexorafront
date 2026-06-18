@@ -144,7 +144,7 @@ export const useCoursesStore = defineStore('courses', {
       this.loading = true
       this.error = ''
       try {
-        const { data } = await api.get('/courses/categories')
+        const { data } = await api.get('/course-categories')
         this.categories = data.data || data
         return this.categories
       } catch (err) {
@@ -164,7 +164,7 @@ export const useCoursesStore = defineStore('courses', {
       this.loading = true
       this.error = ''
       try {
-        const { data } = await api.post('/courses/categories', categoryData)
+        const { data } = await api.post('/course-categories', categoryData)
         const created = data.data || data
         this.categories.unshift(created)
         return created
@@ -186,7 +186,7 @@ export const useCoursesStore = defineStore('courses', {
       this.loading = true
       this.error = ''
       try {
-        const { data } = await api.put(`/courses/categories/${id}`, categoryData)
+        const { data } = await api.put(`/course-categories/${id}`, categoryData)
         const updated = data.data || data
         const index = this.categories.findIndex((c) => c.id === id)
         if (index !== -1) {
@@ -210,7 +210,7 @@ export const useCoursesStore = defineStore('courses', {
       this.loading = true
       this.error = ''
       try {
-        await api.delete(`/courses/categories/${id}`)
+        await api.delete(`/course-categories/${id}`)
         this.categories = this.categories.filter((c) => c.id !== id)
       } catch (err) {
         this.error =

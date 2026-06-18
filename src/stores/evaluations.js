@@ -139,7 +139,7 @@ export const useEvaluationsStore = defineStore('evaluations', {
       this.loading = true
       this.error = ''
       try {
-        const { data } = await api.post(`/evaluations/${evaluationId}/attempts`)
+        const { data } = await api.post(`/evaluations/${evaluationId}/start`)
         this.attempt = data.data || data
         return this.attempt
       } catch (err) {

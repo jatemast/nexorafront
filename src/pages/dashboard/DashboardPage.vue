@@ -34,7 +34,7 @@ const kpiCards = computed(() => [
   {
     key: 'empleados-activos',
     label: 'Empleados Activos',
-    value: dashboardStore.kpis.active_users ?? 0,
+    value: dashboardStore.kpis.active_employees ?? 0,
     icon: 'pi pi-users',
     color: 'bg-primary-500',
     bgLight: 'bg-primary-50 dark:bg-primary-900/20',
@@ -140,7 +140,7 @@ function normalizeChartData(raw, datasetLabel, borderColor, backgroundColor) {
 
 const barChartData = computed(() => {
   return normalizeChartData(
-    dashboardStore.chartData.completions_by_course,
+    dashboardStore.chartData.completions_by_category,
     'Cursos Completados',
     '#3B82F6',
     'rgba(59, 130, 246, 0.6)',
@@ -149,7 +149,7 @@ const barChartData = computed(() => {
 
 const lineChartData = computed(() => {
   return normalizeChartData(
-    dashboardStore.chartData.user_activity,
+    dashboardStore.chartData.monthly_enrollments,
     'Actividad en Plataforma',
     '#06B6D4',
     'rgba(6, 182, 212, 0.2)',
@@ -157,7 +157,7 @@ const lineChartData = computed(() => {
 })
 
 const doughnutChartData = computed(() => {
-  const raw = dashboardStore.chartData.evaluation_scores
+  const raw = dashboardStore.chartData.score_distribution
   if (!raw) return null
 
   // Already in chart.js format
@@ -344,12 +344,7 @@ async function loadDashboardData() {
   loadError.value = ''
 
   try {
-    // Fetch all dashboard data in parallel for better perceived performance
-    await Promise.all([
-      dashboardStore.fetchKPIs(),
-      dashboardStore.fetchChartData(),
-      dashboardStore.fetchRecentActivity(),
-    ])
+    await dashboardStore.fetchDashboard()
   } catch (err) {
     const message = err?.response?.data?.message || dashboardStore.error || 'No se pudieron cargar los datos del dashboard.'
     loadError.value = message

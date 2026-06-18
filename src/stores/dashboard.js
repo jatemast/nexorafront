@@ -4,18 +4,25 @@ import api from '@/services/api'
 export const useDashboardStore = defineStore('dashboard', {
   state: () => ({
     kpis: {
-      total_users: 0,
+      total_employees: 0,
+      active_employees: 0,
       total_courses: 0,
-      total_enrollments: 0,
-      completion_rate: 0,
-      active_users: 0,
+      total_evaluations: 0,
       total_certificates: 0,
+      total_microlearning: 0,
+      total_enrollments: 0,
+      completed_enrollments: 0,
+      in_progress_enrollments: 0,
+      completion_rate: 0,
+      total_attempts: 0,
+      passed_attempts: 0,
+      pass_rate: 0,
+      average_score: 0,
     },
     chartData: {
-      enrollments_over_time: null,
-      completions_by_course: null,
-      user_activity: null,
-      evaluation_scores: null,
+      monthly_enrollments: null,
+      completions_by_category: null,
+      score_distribution: null,
     },
     recentActivity: [],
     loading: false,
@@ -24,71 +31,33 @@ export const useDashboardStore = defineStore('dashboard', {
 
   getters: {
     hasChartData: (state) =>
-      state.chartData.enrollments_over_time !== null ||
-      state.chartData.completions_by_course !== null,
+      state.chartData.monthly_enrollments !== null ||
+      state.chartData.completions_by_category !== null,
     hasRecentActivity: (state) => state.recentActivity.length > 0,
   },
 
   actions: {
     /**
-     * Fetch Key Performance Indicators for the dashboard.
-     * @param {Object} params — optional filters (date_from, date_to, etc.)
+     * Fetch all dashboard data (KPIs, charts, and recent activity)
+     * from the single /api/dashboard endpoint.
+     * @param {Object} params — optional filters (company_id, etc.)
      */
-    async fetchKPIs(params = {}) {
+    async fetchDashboard(params = {}) {
       this.loading = true
       this.error = ''
       try {
-        const { data } = await api.get('/dashboard/kpis', { params })
+        const { data } = await api.get('/dashboard', { params })
         const responseData = data.data || data
-        this.kpis = { ...this.kpis, ...responseData }
-        return this.kpis
-      } catch (err) {
-        this.error =
-          err.response?.data?.message || 'Failed to fetch dashboard KPIs.'
-        throw err
-      } finally {
-        this.loading = false
-      }
-    },
 
-    /**
-     * Fetch chart data for the dashboard.
-     * @param {Object} params — optional filters (date_from, date_to, granularity, etc.)
-     */
-    async fetchChartData(params = {}) {
-      this.loading = true
-      this.error = ''
-      try {
-        const { data } = await api.get('/dashboard/charts', { params })
-        const responseData = data.data || data
-        this.chartData = { ...this.chartData, ...responseData }
-        return this.chartData
-      } catch (err) {
-        this.error =
-          err.response?.data?.message || 'Failed to fetch dashboard chart data.'
-        throw err
-      } finally {
-        this.loading = false
-      }
-    },
+        // The backend returns { kpis, charts, recent_activities }
+        this.kpis = { ...this.kpis, ...(responseData.kpis || {}) }
+        this.chartData = { ...this.chartData, ...(responseData.charts || {}) }
+        this.recentActivity = responseData.recent_activities || []
 
-    /**
-     * Fetch recent activity feed for the dashboard.
-     * @param {Object} params — optional filters (limit, type, etc.)
-     */
-    async fetchRecentActivity(params = {}) {
-      this.loading = true
-      this.error = ''
-      try {
-        const { data } = await api.get('/dashboard/recent-activity', {
-          params,
-        })
-        this.recentActivity = data.data || data
-        return this.recentActivity
+        return { kpis: this.kpis, chartData: this.chartData, recentActivity: this.recentActivity }
       } catch (err) {
         this.error =
-          err.response?.data?.message ||
-          'Failed to fetch recent activity.'
+          err.response?.data?.message || 'Failed to fetch dashboard data.'
         throw err
       } finally {
         this.loading = false

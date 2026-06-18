@@ -168,8 +168,8 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       this.error = ''
       try {
-        const { data } = await api.get('/user')
-        this.user = data.data || data
+        const { data } = await api.get('/auth/user')
+        this.user = data.user || data.data || data
         this.isAuthenticated = true
         localStorage.setItem('nexora-user', JSON.stringify(this.user))
         return this.user
@@ -190,7 +190,7 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       this.error = ''
       try {
-        const { data } = await api.put('/user/profile', profileData)
+        const { data } = await api.put('/auth/profile', profileData)
         this.user = data.data || data
         localStorage.setItem('nexora-user', JSON.stringify(this.user))
         return this.user
@@ -213,7 +213,7 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       this.error = ''
       try {
-        const { data } = await api.put('/user/password', {
+        const { data } = await api.put('/auth/change-password', {
           current_password: oldPassword,
           password: newPassword,
           password_confirmation: newPasswordConfirmation,

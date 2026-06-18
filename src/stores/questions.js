@@ -139,7 +139,7 @@ export const useQuestionsStore = defineStore('questions', {
       this.loading = true
       this.error = ''
       try {
-        const { data } = await api.get('/questions/categories')
+        const { data } = await api.get('/question-categories')
         this.categories = data.data || data
         return this.categories
       } catch (err) {
@@ -159,7 +159,7 @@ export const useQuestionsStore = defineStore('questions', {
       this.loading = true
       this.error = ''
       try {
-        const { data } = await api.post('/questions/categories', categoryData)
+        const { data } = await api.post('/question-categories', categoryData)
         const created = data.data || data
         this.categories.unshift(created)
         return created
@@ -181,7 +181,7 @@ export const useQuestionsStore = defineStore('questions', {
       this.loading = true
       this.error = ''
       try {
-        const { data } = await api.put(`/questions/categories/${id}`, categoryData)
+        const { data } = await api.put(`/question-categories/${id}`, categoryData)
         const updated = data.data || data
         const index = this.categories.findIndex((c) => c.id === id)
         if (index !== -1) {
@@ -205,7 +205,7 @@ export const useQuestionsStore = defineStore('questions', {
       this.loading = true
       this.error = ''
       try {
-        await api.delete(`/questions/categories/${id}`)
+        await api.delete(`/question-categories/${id}`)
         this.categories = this.categories.filter((c) => c.id !== id)
       } catch (err) {
         this.error =

@@ -70,7 +70,7 @@ export const useCertificatesStore = defineStore('certificates', {
       this.loading = true
       this.error = ''
       try {
-        const { data } = await api.get('/certificates/templates', { params })
+        const { data } = await api.get('/certificate-templates', { params })
         this.templates = data.data || data
         return this.templates
       } catch (err) {
@@ -90,7 +90,7 @@ export const useCertificatesStore = defineStore('certificates', {
       this.loading = true
       this.error = ''
       try {
-        const { data } = await api.get(`/certificates/templates/${id}`)
+        const { data } = await api.get(`/certificate-templates/${id}`)
         this.template = data.data || data
         return this.template
       } catch (err) {
@@ -111,7 +111,7 @@ export const useCertificatesStore = defineStore('certificates', {
       this.loading = true
       this.error = ''
       try {
-        const { data } = await api.post('/certificates/templates', templateData)
+        const { data } = await api.post('/certificate-templates', templateData)
         const created = data.data || data
         this.templates.unshift(created)
         return created
@@ -134,7 +134,7 @@ export const useCertificatesStore = defineStore('certificates', {
       this.error = ''
       try {
         const { data } = await api.put(
-          `/certificates/templates/${id}`,
+          `/certificate-templates/${id}`,
           templateData
         )
         const updated = data.data || data
@@ -164,7 +164,7 @@ export const useCertificatesStore = defineStore('certificates', {
       this.loading = true
       this.error = ''
       try {
-        await api.delete(`/certificates/templates/${id}`)
+        await api.delete(`/certificate-templates/${id}`)
         this.templates = this.templates.filter((t) => t.id !== id)
         if (this.template && this.template.id === id) {
           this.template = null
@@ -187,7 +187,7 @@ export const useCertificatesStore = defineStore('certificates', {
       this.loading = true
       this.error = ''
       try {
-        const response = await api.get(`/certificates/${certificateId}/pdf`, {
+        const response = await api.get(`/certificates/${certificateId}/download`, {
           responseType: 'blob',
         })
 

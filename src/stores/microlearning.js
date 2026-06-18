@@ -149,7 +149,7 @@ export const useMicrolearningStore = defineStore('microlearning', {
       this.error = ''
       try {
         const { data } = await api.post(
-          '/microlearning/assignments',
+          `/microlearning/${assignmentData.microlearning_id || assignmentData.content_id}/assign`,
           assignmentData
         )
         const created = data.data || data
@@ -173,7 +173,7 @@ export const useMicrolearningStore = defineStore('microlearning', {
       this.loading = true
       this.error = ''
       try {
-        const { data } = await api.get('/microlearning/assignments', {
+        const { data } = await api.get('/microlearning-tracking', {
           params,
         })
         this.assignments = data.data || data
