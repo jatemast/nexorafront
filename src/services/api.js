@@ -46,6 +46,41 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+
+    // ── SaaS Multi-tenant: attach company_id to every request ──────────
+    // Every backend controller expects company_id for data isolation.
+    // Skip only for auth endpoints (login, register, password reset).
+    const skipCompanyId = config.url && (
+      config.url.includes('/auth/login') ||
+      config.url.includes('/auth/register') ||
+      config.url.includes('/auth/forgot-password') ||
+      config.url.includes('/auth/reset-password') ||
+      config.url.includes('/auth/refresh')
+    )
+
+    if (!skipCompanyId) {
+      const companyId = localStorage.getItem('nexora-company-id')
+      if (companyId) {
+        // For GET/DELETE, attach as query param
+        if (['get', 'delete'].includes(config.method?.toLowerCase())) {
+          config.params = {
+            ...(config.params || {}),
+            company_id: companyId,
+          }
+        } else {
+          // For POST/PUT/PATCH, attach to body if not a FormData
+          if (config.data instanceof FormData) {
+            config.data.append('company_id', companyId)
+          } else {
+            config.data = {
+              ...(config.data || {}),
+              company_id: companyId,
+            }
+          }
+        }
+      }
+    }
+
     return config
   },
   (error) => {
@@ -145,6 +180,7 @@ api.interceptors.response.use(
             localStorage.removeItem('nexora-auth-token')
             localStorage.removeItem('nexora-refresh-token')
             localStorage.removeItem('nexora-user')
+            localStorage.removeItem('nexora-company-id')
 
             if (toast) {
               toast.add({
@@ -171,6 +207,7 @@ api.interceptors.response.use(
         localStorage.removeItem('nexora-auth-token')
         localStorage.removeItem('nexora-refresh-token')
         localStorage.removeItem('nexora-user')
+        localStorage.removeItem('nexora-company-id')
 
         if (toast) {
           toast.add({

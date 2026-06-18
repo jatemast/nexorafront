@@ -43,6 +43,34 @@ const CertificateTemplates = () => import('@/pages/certificates/CertificateTempl
 const CertificateTemplateCreate = () => import('@/pages/certificates/CertificateTemplateCreate.vue')
 const CertificateTemplateEdit = () => import('@/pages/certificates/CertificateTemplateEdit.vue')
 
+const MasterDashboard = () => import('@/pages/admin/MasterDashboard.vue')
+
+// Organizational
+const OrganigramPage = () => import('@/pages/organizational/OrganigramPage.vue')
+const BranchesIndex = () => import('@/pages/organizational/BranchesIndex.vue')
+const AreasIndex = () => import('@/pages/organizational/AreasIndex.vue')
+const ProcessesIndex = () => import('@/pages/organizational/ProcessesIndex.vue')
+const PositionsIndex = () => import('@/pages/organizational/PositionsIndex.vue')
+
+// Documents
+const DocumentsIndex = () => import('@/pages/documents/DocumentsIndex.vue')
+const DocumentUpload = () => import('@/pages/documents/DocumentUpload.vue')
+const DocumentAssign = () => import('@/pages/documents/DocumentAssign.vue')
+
+// Gamification
+const GamificationIndex = () => import('@/pages/gamification/GamificationIndex.vue')
+const LeaderboardPage = () => import('@/pages/gamification/LeaderboardPage.vue')
+const BadgesIndex = () => import('@/pages/gamification/BadgesIndex.vue')
+const ChallengesIndex = () => import('@/pages/gamification/ChallengesIndex.vue')
+
+// WhatsApp
+const WhatsAppSchedules = () => import('@/pages/whatsapp/WhatsAppSchedules.vue')
+const WhatsAppMessages = () => import('@/pages/whatsapp/WhatsAppMessages.vue')
+
+// Surveys
+const SurveysIndex = () => import('@/pages/whatsapp/SurveysIndex.vue')
+const SurveyResults = () => import('@/pages/whatsapp/SurveyResults.vue')
+
 const NotFound = () => import('@/views/errors/NotFound.vue')
 
 // ---------------------------------------------------------------------------
@@ -372,6 +400,179 @@ const routes = [
           roles: ['admin'],
         },
       },
+      // --- Organizational ---
+      {
+        path: 'organizational/orgchart',
+        name: 'OrganigramPage',
+        component: OrganigramPage,
+        meta: {
+          title: 'Organigrama',
+          breadcrumb: 'Organigrama',
+          roles: ['admin'],
+        },
+      },
+      {
+        path: 'organizational/branches',
+        name: 'Branches',
+        component: BranchesIndex,
+        meta: {
+          title: 'Sucursales',
+          breadcrumb: 'Sucursales',
+          roles: ['admin'],
+        },
+      },
+      {
+        path: 'organizational/areas',
+        name: 'Areas',
+        component: AreasIndex,
+        meta: {
+          title: 'Áreas',
+          breadcrumb: 'Áreas',
+          roles: ['admin'],
+        },
+      },
+      {
+        path: 'organizational/processes',
+        name: 'Processes',
+        component: ProcessesIndex,
+        meta: {
+          title: 'Procesos',
+          breadcrumb: 'Procesos',
+          roles: ['admin'],
+        },
+      },
+      {
+        path: 'organizational/positions',
+        name: 'Positions',
+        component: PositionsIndex,
+        meta: {
+          title: 'Cargos',
+          breadcrumb: 'Cargos',
+          roles: ['admin'],
+        },
+      },
+
+      // --- Documents ---
+      {
+        path: 'documents',
+        name: 'Documents',
+        component: DocumentsIndex,
+        meta: {
+          title: 'Documentos',
+          breadcrumb: 'Documentos',
+        },
+      },
+      {
+        path: 'documents/upload',
+        name: 'DocumentUpload',
+        component: DocumentUpload,
+        meta: {
+          title: 'Subir Documento',
+          breadcrumb: 'Subir Documento',
+          roles: ['admin'],
+        },
+      },
+      {
+        path: 'documents/assign',
+        name: 'DocumentAssign',
+        component: DocumentAssign,
+        meta: {
+          title: 'Asignar Documento',
+          breadcrumb: 'Asignar Documento',
+          roles: ['admin'],
+        },
+      },
+
+      // --- Gamification ---
+      {
+        path: 'gamification',
+        name: 'Gamification',
+        component: GamificationIndex,
+        meta: {
+          title: 'Gamificación',
+          breadcrumb: 'Gamificación',
+        },
+      },
+      {
+        path: 'gamification/leaderboard',
+        name: 'Leaderboard',
+        component: LeaderboardPage,
+        meta: {
+          title: 'Tabla de Posiciones',
+          breadcrumb: 'Tabla de Posiciones',
+        },
+      },
+      {
+        path: 'gamification/badges',
+        name: 'Badges',
+        component: BadgesIndex,
+        meta: {
+          title: 'Insignias',
+          breadcrumb: 'Insignias',
+        },
+      },
+      {
+        path: 'gamification/challenges',
+        name: 'Challenges',
+        component: ChallengesIndex,
+        meta: {
+          title: 'Desafíos',
+          breadcrumb: 'Desafíos',
+        },
+      },
+
+      // --- WhatsApp ---
+      {
+        path: 'whatsapp/schedules',
+        name: 'WhatsAppSchedules',
+        component: WhatsAppSchedules,
+        meta: {
+          title: 'Programaciones WhatsApp',
+          breadcrumb: 'Programaciones WhatsApp',
+          roles: ['admin'],
+        },
+      },
+      {
+        path: 'whatsapp/messages',
+        name: 'WhatsAppMessages',
+        component: WhatsAppMessages,
+        meta: {
+          title: 'Historial WhatsApp',
+          breadcrumb: 'Historial WhatsApp',
+          roles: ['admin'],
+        },
+      },
+
+      // --- Surveys ---
+      {
+        path: 'surveys',
+        name: 'Surveys',
+        component: SurveysIndex,
+        meta: {
+          title: 'Encuestas',
+          breadcrumb: 'Encuestas',
+        },
+      },
+      {
+        path: 'surveys/:id/results',
+        name: 'SurveyResults',
+        component: SurveyResults,
+        meta: {
+          title: 'Resultados de Encuesta',
+          breadcrumb: 'Resultados de Encuesta',
+        },
+      },
+      // --- Master / Super-Admin ---
+      {
+        path: 'admin',
+        name: 'MasterDashboard',
+        component: MasterDashboard,
+        meta: {
+          title: 'Panel Maestro',
+          breadcrumb: 'Panel Maestro',
+          masterOnly: true,
+        },
+      },
     ],
   },
 
@@ -438,19 +639,24 @@ router.beforeEach((to, from, next) => {
   // current user's role is not included, they are redirected to /dashboard.
   // If the user object hasn't been loaded yet, the guard allows navigation
   // (the store's `fetchUser` action should be called on app init).
+  // --- Master-only guard ---
+  if (to.meta.masterOnly && !authStore.isSuperAdmin) {
+    return next({ name: 'Dashboard' })
+  }
+
+  // --- Role-based access guard ---
   const requiredRoles = to.meta.roles
   if (requiredRoles && Array.isArray(requiredRoles) && requiredRoles.length > 0) {
     const currentUser = authStore.user
 
-    // If user data is missing (e.g. page refresh before fetchUser completes),
-    // attempt to restore session from localStorage
     if (!currentUser) {
       authStore.restoreSession()
     }
 
-    const userRole = authStore.user?.role
+    const userRoles = authStore.user?.roles || []
+    const hasRole = requiredRoles.some((r) => userRoles.includes(r))
 
-    if (!userRole || !requiredRoles.includes(userRole)) {
+    if (!hasRole) {
       return next({ name: 'Dashboard' })
     }
   }

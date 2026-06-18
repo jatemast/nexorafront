@@ -151,41 +151,133 @@ const navItems = [
     to: { name: 'Employees' },
     icon: 'pi pi-users',
     match: ['Employees', 'EmployeeCreate', 'EmployeeEdit'],
+    companyScoped: true,
   },
   {
     label: 'Cursos',
     to: { name: 'Courses' },
     icon: 'pi pi-book',
     match: ['Courses', 'CourseCreate', 'CourseDetail', 'CourseEdit', 'CourseCategories'],
+    companyScoped: true,
   },
   {
     label: 'Microlearning',
     to: { name: 'Microlearning' },
     icon: 'pi pi-play-circle',
     match: ['Microlearning', 'MicrolearningCreate', 'MicrolearningAssign'],
+    companyScoped: true,
   },
   {
     label: 'Banco Preguntas',
     to: { name: 'Questions' },
     icon: 'pi pi-question-circle',
     match: ['Questions', 'QuestionCreate', 'QuestionEdit', 'QuestionCategories'],
+    companyScoped: true,
   },
   {
     label: 'Evaluaciones',
     to: { name: 'Evaluations' },
     icon: 'pi pi-check-square',
     match: ['Evaluations', 'EvaluationCreate', 'EvaluationEdit', 'EvaluationTake', 'EvaluationResults'],
+    companyScoped: true,
   },
   {
     label: 'Certificados',
     to: { name: 'Certificates' },
     icon: 'pi pi-verified',
     match: ['Certificates', 'CertificateTemplates', 'CertificateTemplateCreate', 'CertificateTemplateEdit'],
+    companyScoped: true,
+  },
+  // ─── Organigrama ────────────────────────────────────────────────
+  {
+    label: 'Organigrama',
+    to: { name: 'OrganigramPage' },
+    icon: 'pi pi-sitemap',
+    match: ['OrganigramPage', 'Branches', 'Areas', 'Processes', 'Positions'],
+    companyScoped: true,
+    children: [
+      { label: 'Vista General', to: { name: 'OrganigramPage' }, match: ['OrganigramPage'] },
+      { label: 'Sucursales', to: { name: 'Branches' }, match: ['Branches'] },
+      { label: 'Áreas', to: { name: 'Areas' }, match: ['Areas'] },
+      { label: 'Procesos', to: { name: 'Processes' }, match: ['Processes'] },
+      { label: 'Cargos', to: { name: 'Positions' }, match: ['Positions'] },
+    ],
+  },
+  // ─── Documentos ─────────────────────────────────────────────────
+  {
+    label: 'Documentos',
+    to: { name: 'Documents' },
+    icon: 'pi pi-folder-open',
+    match: ['Documents', 'DocumentUpload', 'DocumentAssign'],
+    companyScoped: true,
+    children: [
+      { label: 'Biblioteca', to: { name: 'Documents' }, match: ['Documents', 'DocumentAssign'] },
+      { label: 'Subir Documento', to: { name: 'DocumentUpload' }, match: ['DocumentUpload'] },
+    ],
+  },
+  // ─── Gamificación ───────────────────────────────────────────────
+  {
+    label: 'Gamificación',
+    to: { name: 'Gamification' },
+    icon: 'pi pi-star',
+    match: ['Gamification', 'Leaderboard', 'Badges', 'Challenges'],
+    companyScoped: true,
+    children: [
+      { label: 'Panel', to: { name: 'Gamification' }, match: ['Gamification'] },
+      { label: 'Leaderboard', to: { name: 'Leaderboard' }, match: ['Leaderboard'] },
+      { label: 'Insignias', to: { name: 'Badges' }, match: ['Badges'] },
+      { label: 'Retos', to: { name: 'Challenges' }, match: ['Challenges'] },
+    ],
+  },
+  // ─── WhatsApp ───────────────────────────────────────────────────
+  {
+    label: 'WhatsApp',
+    to: { name: 'WhatsAppSchedules' },
+    icon: 'pi pi-whatsapp',
+    match: ['WhatsAppSchedules', 'WhatsAppMessages'],
+    companyScoped: true,
+    children: [
+      { label: 'Programaciones', to: { name: 'WhatsAppSchedules' }, match: ['WhatsAppSchedules'] },
+      { label: 'Historial', to: { name: 'WhatsAppMessages' }, match: ['WhatsAppMessages'] },
+    ],
+  },
+  // ─── Encuestas ──────────────────────────────────────────────────
+  {
+    label: 'Encuestas',
+    to: { name: 'Surveys' },
+    icon: 'pi pi-chart-bar',
+    match: ['Surveys', 'SurveyResults'],
+    companyScoped: true,
   },
 ]
 
+// Filter navItems when master is impersonating — hide company-scoped items
+const visibleNavItems = computed(() => {
+  if (authStore.isImpersonating) {
+    return navItems.filter((item) => !item.companyScoped)
+  }
+  return navItems
+})
+
+const expandedMenu = ref(null)
+
+function toggleMenu(label) {
+  expandedMenu.value = expandedMenu.value === label ? null : label
+}
+
+function isMenuExpanded(label) {
+  return expandedMenu.value === label
+}
+
 function isActive(item) {
   return item.match.includes(route.name)
+}
+
+function isChildActive(item) {
+  if (item.children) {
+    return item.children.some((child) => child.match.includes(route.name))
+  }
+  return false
 }
 
 // ---------------------------------------------------------------------------
@@ -282,35 +374,104 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
       <!-- Navigation -->
       <nav class="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 space-y-1">
-        <RouterLink
-          v-for="item in navItems"
-          :key="item.label"
-          :to="item.to"
-          :class="[
-            'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
-            isActive(item)
-              ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 shadow-sm'
-              : 'text-surface-600 dark:text-surface-500 hover:bg-surface-50 dark:hover:bg-surface-100 hover:text-surface-900 dark:hover:text-surface-950',
-          ]"
-          @click="closeMobileSidebar"
+        <!-- Impersonation Banner -->
+        <div
+          v-if="authStore.isImpersonating"
+          class="mb-3 px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700"
         >
-          <i
+          <p class="text-xs font-medium text-amber-700 dark:text-amber-400">
+            <i class="pi pi-eye mr-1" /> Suplantando: {{ authStore.impersonatingCompany?.name || 'Empresa' }}
+          </p>
+        </div>
+
+        <template v-for="item in visibleNavItems" :key="item.label">
+          <!-- Parent item with children -->
+          <div v-if="item.children">
+            <button
+              :class="[
+                'w-full group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 text-left',
+                isChildActive(item)
+                  ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 shadow-sm'
+                  : 'text-surface-600 dark:text-surface-500 hover:bg-surface-50 dark:hover:bg-surface-100 hover:text-surface-900 dark:hover:text-surface-950',
+              ]"
+              @click="toggleMenu(item.label)"
+            >
+              <i
+                :class="[
+                  item.icon,
+                  'text-lg shrink-0 transition-colors duration-200',
+                  isChildActive(item) ? 'text-primary-600 dark:text-primary-400' : 'text-surface-400 dark:text-surface-500 group-hover:text-surface-600 dark:group-hover:text-surface-400',
+                ]"
+              />
+              <Transition name="brand-fade">
+                <span v-show="!sidebarCollapsed || isMobile" class="whitespace-nowrap flex-1">{{ item.label }}</span>
+              </Transition>
+              <Transition name="brand-fade">
+                <i
+                  v-show="!sidebarCollapsed || isMobile"
+                  :class="[
+                    'pi text-xs transition-transform duration-200 shrink-0',
+                    isMenuExpanded(item.label) ? 'pi-chevron-down' : 'pi-chevron-right',
+                    isChildActive(item) ? 'text-primary-500' : 'text-surface-400',
+                  ]"
+                />
+              </Transition>
+            </button>
+            <!-- Children -->
+            <div
+              v-show="isMenuExpanded(item.label) && (!sidebarCollapsed || isMobile)"
+              class="ml-4 mt-1 space-y-1 border-l border-surface-200 dark:border-surface-200 pl-3"
+            >
+              <RouterLink
+                v-for="child in item.children"
+                :key="child.label"
+                :to="child.to"
+                :class="[
+                  'group flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all duration-200',
+                  isActive(child)
+                    ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
+                    : 'text-surface-500 dark:text-surface-500 hover:bg-surface-50 dark:hover:bg-surface-100 hover:text-surface-700 dark:hover:text-surface-400',
+                ]"
+                @click="closeMobileSidebar"
+              >
+                <span
+                  class="h-1.5 w-1.5 rounded-full shrink-0"
+                  :class="isActive(child) ? 'bg-primary-500' : 'bg-surface-300 dark:bg-surface-600'"
+                />
+                <span class="whitespace-nowrap text-xs">{{ child.label }}</span>
+              </RouterLink>
+            </div>
+          </div>
+
+          <!-- Single item without children -->
+          <RouterLink
+            v-else
+            :to="item.to"
             :class="[
-              item.icon,
-              'text-lg shrink-0 transition-colors duration-200',
-              isActive(item) ? 'text-primary-600 dark:text-primary-400' : 'text-surface-400 dark:text-surface-500 group-hover:text-surface-600 dark:group-hover:text-surface-400',
+              'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
+              isActive(item)
+                ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 shadow-sm'
+                : 'text-surface-600 dark:text-surface-500 hover:bg-surface-50 dark:hover:bg-surface-100 hover:text-surface-900 dark:hover:text-surface-950',
             ]"
-          />
-          <Transition name="brand-fade">
-            <span v-show="!sidebarCollapsed || isMobile" class="whitespace-nowrap">{{ item.label }}</span>
-          </Transition>
-          <!-- Active indicator dot -->
-          <span
-            v-if="isActive(item)"
-            class="ml-auto h-1.5 w-1.5 rounded-full bg-primary-500 shrink-0"
-            :class="{ 'hidden': sidebarCollapsed && !isMobile }"
-          />
-        </RouterLink>
+            @click="closeMobileSidebar"
+          >
+            <i
+              :class="[
+                item.icon,
+                'text-lg shrink-0 transition-colors duration-200',
+                isActive(item) ? 'text-primary-600 dark:text-primary-400' : 'text-surface-400 dark:text-surface-500 group-hover:text-surface-600 dark:group-hover:text-surface-400',
+              ]"
+            />
+            <Transition name="brand-fade">
+              <span v-show="!sidebarCollapsed || isMobile" class="whitespace-nowrap">{{ item.label }}</span>
+            </Transition>
+            <span
+              v-if="isActive(item)"
+              class="ml-auto h-1.5 w-1.5 rounded-full bg-primary-500 shrink-0"
+              :class="{ 'hidden': sidebarCollapsed && !isMobile }"
+            />
+          </RouterLink>
+        </template>
       </nav>
 
       <!-- Sidebar Footer -->

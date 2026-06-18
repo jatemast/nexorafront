@@ -14,6 +14,23 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     isLoggedIn: (state) => state.isAuthenticated && !!state.token,
     currentUser: (state) => state.user,
+    /** The current user's company_id for SaaS multi-tenant isolation. */
+    companyId: (state) => state.user?.company_id || localStorage.getItem('nexora-company-id') || null,
+    /** Whether the current user is a Super Administrador (Master). */
+    isSuperAdmin: (state) => {
+      const roles = state.user?.roles || []
+      return Array.isArray(roles)
+        ? roles.includes('Super Administrador')
+        : false
+    },
+    /** Whether the master is currently impersonating a company. */
+    isImpersonating: () => !!localStorage.getItem('nexora-impersonating-company-id'),
+    /** The company being impersonated (if any). */
+    impersonatingCompany: () => {
+      const raw = localStorage.getItem('nexora-impersonating-company')
+      if (!raw) return null
+      try { return JSON.parse(raw) } catch { return null }
+    },
   },
 
   actions: {
@@ -40,6 +57,10 @@ export const useAuthStore = defineStore('auth', {
         if (data.user) {
           this.user = data.user
           localStorage.setItem('nexora-user', JSON.stringify(data.user))
+          // Persist company_id for SaaS multi-tenant isolation
+          if (data.user.company_id) {
+            localStorage.setItem('nexora-company-id', data.user.company_id)
+          }
         }
 
         // Fetch full user profile
@@ -74,6 +95,9 @@ export const useAuthStore = defineStore('auth', {
         localStorage.removeItem('nexora-auth-token')
         localStorage.removeItem('nexora-refresh-token')
         localStorage.removeItem('nexora-user')
+        localStorage.removeItem('nexora-company-id')
+        localStorage.removeItem('nexora-impersonating-company-id')
+        localStorage.removeItem('nexora-impersonating-company')
 
         this.loading = false
       }
@@ -172,6 +196,10 @@ export const useAuthStore = defineStore('auth', {
         this.user = data.user || data.data || data
         this.isAuthenticated = true
         localStorage.setItem('nexora-user', JSON.stringify(this.user))
+        // Persist company_id for SaaS multi-tenant isolation
+        if (this.user?.company_id) {
+          localStorage.setItem('nexora-company-id', this.user.company_id)
+        }
         return this.user
       } catch (err) {
         this.error =
@@ -243,10 +271,80 @@ export const useAuthStore = defineStore('auth', {
         if (storedUser) {
           try {
             this.user = JSON.parse(storedUser)
+            // Restore company_id from user object if not already set
+            if (this.user?.company_id && !localStorage.getItem('nexora-company-id')) {
+              localStorage.setItem('nexora-company-id', this.user.company_id)
+            }
           } catch {
             this.user = null
           }
         }
+      }
+    },
+
+    // ─── Impersonation (Master / Super-Admin) ─────────────────────────
+
+    /**
+     * Impersonate a company — the master operates as that company.
+     * @param {number|string} companyId
+     */
+    async impersonate(companyId) {
+      this.loading = true
+      this.error = ''
+      try {
+        const { data } = await api.post(`/admin/impersonate/${companyId}`)
+
+        this.token = data.token
+        this.user = data.user
+        this.isAuthenticated = true
+
+        localStorage.setItem('nexora-auth-token', this.token)
+        localStorage.setItem('nexora-user', JSON.stringify(data.user))
+
+        if (data.impersonating) {
+          localStorage.setItem('nexora-impersonating-company-id', data.impersonating.company_id)
+          localStorage.setItem('nexora-impersonating-company', JSON.stringify(data.impersonating))
+        }
+
+        if (data.user.company_id) {
+          localStorage.setItem('nexora-company-id', data.user.company_id)
+        }
+
+        return data
+      } catch (err) {
+        this.error = err.response?.data?.message || 'Failed to impersonate company.'
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    /**
+     * Stop impersonating — return to master view.
+     */
+    async stopImpersonating() {
+      this.loading = true
+      this.error = ''
+      try {
+        const { data } = await api.post('/admin/stop-impersonating')
+
+        this.token = data.token
+        this.user = data.user
+        this.isAuthenticated = true
+
+        localStorage.setItem('nexora-auth-token', this.token)
+        localStorage.setItem('nexora-user', JSON.stringify(data.user))
+
+        localStorage.removeItem('nexora-impersonating-company-id')
+        localStorage.removeItem('nexora-impersonating-company')
+        localStorage.removeItem('nexora-company-id')
+
+        return data
+      } catch (err) {
+        this.error = err.response?.data?.message || 'Failed to stop impersonating.'
+        throw err
+      } finally {
+        this.loading = false
       }
     },
   },
