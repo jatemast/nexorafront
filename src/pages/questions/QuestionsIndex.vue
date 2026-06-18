@@ -34,13 +34,15 @@ const searchQuery = ref('')
 const selectedCategory = ref(null)
 const selectedDifficulty = ref(null)
 const selectedCourse = ref(null)
+const courseCategoryIds = ref([])
+const courseFilterLoading = ref(false)
 
 let searchTimer = null
 
 const difficultyOptions = [
-  { label: 'Easy', value: 'easy' },
-  { label: 'Medium', value: 'medium' },
-  { label: 'Hard', value: 'hard' },
+  { label: 'Fácil', value: 'easy' },
+  { label: 'Medio', value: 'medium' },
+  { label: 'Difícil', value: 'hard' },
 ]
 
 // ---------------------------------------------------------------------------
@@ -79,12 +81,8 @@ const filteredQuestions = computed(() => {
     list = list.filter((qst) => qst.difficulty === selectedDifficulty.value)
   }
 
-  if (selectedCourse.value) {
-    list = list.filter(
-      (qst) =>
-        qst.course_id === selectedCourse.value ||
-        (qst.course && qst.course.id === selectedCourse.value),
-    )
+  if (selectedCourse.value && courseCategoryIds.value.length > 0) {
+    list = list.filter((qst) => courseCategoryIds.value.includes(qst.category_id))
   }
 
   return list
@@ -124,7 +122,7 @@ async function fetchInitialData() {
     const message =
       err.response?.data?.message ||
       questionsStore.error ||
-      'Failed to load questions.'
+      'Error al cargar las preguntas.'
     loadError.value = message
     toast.add({
       severity: 'error',
@@ -134,6 +132,50 @@ async function fetchInitialData() {
     })
   } finally {
     initialLoading.value = false
+  }
+}
+
+async function onCourseFilterChange(courseId) {
+  selectedCourse.value = courseId
+  courseCategoryIds.value = []
+
+  if (!courseId) return
+
+  courseFilterLoading.value = true
+  try {
+    // Fetch course detail to get evaluations with question_categories
+    await coursesStore.fetchOne(courseId)
+    const course = coursesStore.course
+    const evaluations = course?._evaluationsWithQuestions || course?.evaluations || []
+
+    // Extract question category IDs from evaluation's question_categories slugs
+    const categorySlugs = []
+    for (const ev of evaluations) {
+      const cats = typeof ev.question_categories === 'string'
+        ? JSON.parse(ev.question_categories)
+        : ev.question_categories || []
+      categorySlugs.push(...cats)
+    }
+
+    // Match slugs to loaded categories
+    const allCategories = questionsStore.categories
+    if (allCategories.length === 0) {
+      await questionsStore.fetchCategories()
+    }
+    const matchedIds = questionsStore.categories
+      .filter(c => categorySlugs.includes(c.slug))
+      .map(c => c.id)
+
+    courseCategoryIds.value = matchedIds
+  } catch (err) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'No se pudo cargar el banco de preguntas del curso.',
+      life: 4000,
+    })
+  } finally {
+    courseFilterLoading.value = false
   }
 }
 
@@ -155,11 +197,11 @@ function navigateToEdit(id) {
 function confirmDelete(id, text) {
   const preview = truncateText(text || `#${id}`, 60)
   confirm.require({
-    message: `Are you sure you want to delete "${preview}"? This action cannot be undone.`,
-    header: 'Delete Question',
+    message: `¿Está seguro de que desea eliminar "${preview}"? Esta acción no se puede deshacer.`,
+    header: 'Eliminar Pregunta',
     icon: 'pi pi-exclamation-triangle',
-    rejectLabel: 'Cancel',
-    acceptLabel: 'Delete',
+    rejectLabel: 'Cancelar',
+    acceptLabel: 'Eliminar',
     acceptClass: 'p-button-danger',
     accept: () => handleDelete(id, preview),
   })
@@ -170,18 +212,18 @@ async function handleDelete(id, preview) {
     await questionsStore.delete(id)
     toast.add({
       severity: 'success',
-      summary: 'Deleted',
-      detail: `Question "${preview}" has been deleted.`,
+      summary: 'Eliminada',
+      detail: `Pregunta "${preview}" eliminada exitosamente.`,
       life: 4000,
     })
   } catch (err) {
     const message =
       err.response?.data?.message ||
       questionsStore.error ||
-      'Failed to delete question.'
+      'Error al eliminar la pregunta.'
     toast.add({
       severity: 'error',
-      summary: 'Delete Failed',
+      summary: 'Error',
       detail: message,
       life: 6000,
     })
@@ -193,18 +235,19 @@ function clearFilters() {
   selectedCategory.value = null
   selectedDifficulty.value = null
   selectedCourse.value = null
+  courseCategoryIds.value = []
 }
 
 function getTypeLabel(type) {
   switch (type) {
     case 'multiple_choice':
-      return 'Multiple Choice'
+      return 'Opción Múltiple'
     case 'multiple_select':
-      return 'Multiple Select'
+      return 'Selección Múltiple'
     case 'true_false':
-      return 'True / False'
+      return 'Verdadero / Falso'
     default:
-      return type || 'Unknown'
+      return type || 'Desconocido'
   }
 }
 
@@ -237,11 +280,11 @@ function getDifficultySeverity(difficulty) {
 function getDifficultyLabel(difficulty) {
   switch (difficulty) {
     case 'easy':
-      return 'Easy'
+      return 'Fácil'
     case 'medium':
-      return 'Medium'
+      return 'Medio'
     case 'hard':
-      return 'Hard'
+      return 'Difícil'
     default:
       return difficulty || '—'
   }
@@ -257,11 +300,13 @@ function categoryName(question) {
 }
 
 function courseName(question) {
-  if (question.course) return question.course.title || question.course.name
-  const crs = courses.value.find(
-    (c) => c.id === question.course_id,
-  )
-  return crs ? (crs.title || crs.name) : '—'
+  // If a course filter is active, show that course's name
+  if (selectedCourse.value) {
+    const crs = courses.value.find(c => c.id === selectedCourse.value)
+    if (crs) return crs.title || crs.name
+  }
+  // Otherwise show the category (since questions link to courses via categories)
+  return categoryName(question)
 }
 
 function truncateText(text, maxLength = 120) {
@@ -302,17 +347,17 @@ onMounted(() => {
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h1 class="text-2xl font-bold text-surface-900 dark:text-surface-950 tracking-tight">
-          Questions
+          Banco de Preguntas
         </h1>
         <p class="text-sm text-surface-500 dark:text-surface-500 mt-1">
-          Browse and manage the question bank
+          Explora y gestiona el banco de preguntas
         </p>
       </div>
 
       <div class="flex items-center gap-2">
         <Button
           icon="pi pi-plus"
-          label="Create Question"
+          label="Crear Pregunta"
           severity="primary"
           size="small"
           @click="navigateToCreate"
@@ -366,7 +411,7 @@ onMounted(() => {
         <!-- Category Filter -->
         <div v-if="hasCategories" class="flex gap-2 flex-wrap">
           <Button
-            :label="'All Categories'"
+            :label="'Todas'"
             :severity="!selectedCategory ? 'primary' : 'secondary'"
             :outlined="!!selectedCategory"
             size="small"
@@ -389,7 +434,7 @@ onMounted(() => {
           :options="difficultyOptions"
           option-label="label"
           option-value="value"
-          placeholder="All Difficulties"
+          placeholder="Dificultad"
           class="w-full sm:w-44"
           show-clear
           size="small"
@@ -402,18 +447,20 @@ onMounted(() => {
           :options="courseOptions"
           option-label="label"
           option-value="value"
-          placeholder="All Courses"
+          placeholder="Todos los Cursos"
           class="w-full sm:w-48"
           show-clear
           filter
           size="small"
+          :loading="courseFilterLoading"
+          @change="onCourseFilterChange(selectedCourse)"
         />
 
         <!-- Clear Filters -->
         <Button
           v-if="hasActiveFilters"
           icon="pi pi-times"
-          label="Clear"
+          label="Limpiar"
           severity="secondary"
           text
           size="small"
@@ -429,13 +476,13 @@ onMounted(() => {
           </InputIcon>
           <InputText
             v-model="searchQuery"
-            placeholder="Search questions..."
+            placeholder="Buscar preguntas..."
             class="w-full"
             @input="onSearchInput"
           />
         </IconField>
         <span class="text-sm text-surface-400 dark:text-surface-500">
-          {{ displayQuestions.length }} question{{ displayQuestions.length !== 1 ? 's' : '' }}
+          {{ displayQuestions.length }} pregunta{{ displayQuestions.length !== 1 ? 's' : '' }}
         </span>
       </div>
 
@@ -450,14 +497,14 @@ onMounted(() => {
           </div>
         </div>
         <h3 class="text-lg font-semibold text-surface-700 dark:text-surface-600 mb-2">
-          No questions yet
+          No hay preguntas aún
         </h3>
         <p class="text-sm text-surface-500 dark:text-surface-500 max-w-sm mx-auto mb-6">
-          Get started by creating your first question for the question bank.
+          Comienza creando tu primera pregunta para el banco de preguntas.
         </p>
         <Button
           icon="pi pi-plus"
-          label="Create Question"
+          label="Crear Pregunta"
           severity="primary"
           @click="navigateToCreate"
         />
@@ -474,14 +521,14 @@ onMounted(() => {
           </div>
         </div>
         <h3 class="text-base font-semibold text-surface-600 dark:text-surface-500 mb-1">
-          No matching questions
+          Sin resultados
         </h3>
         <p class="text-sm text-surface-400 dark:text-surface-500 max-w-sm mx-auto mb-4">
-          Try adjusting your search or filters.
+          Intenta ajustar tu búsqueda o filtros.
         </p>
         <Button
           icon="pi pi-times"
-          label="Clear Filters"
+          label="Limpiar Filtros"
           severity="secondary"
           size="small"
           @click="clearFilters"
@@ -502,7 +549,7 @@ onMounted(() => {
           current-page-report-template="Showing {first} to {last} of {totalRecords}"
         >
           <!-- Question Text -->
-          <Column header="Question" class="min-w-[280px]">
+          <Column header="Pregunta" class="min-w-[280px]">
             <template #body="{ data }">
               <div class="min-w-0 cursor-pointer" @click="navigateToEdit(data.id)">
                 <p class="text-sm font-medium text-surface-800 dark:text-surface-600 line-clamp-2">
@@ -513,7 +560,7 @@ onMounted(() => {
           </Column>
 
           <!-- Type -->
-          <Column field="type" header="Type" class="min-w-[140px]">
+          <Column field="type" header="Tipo" class="min-w-[140px]">
             <template #body="{ data }">
               <Tag
                 :value="getTypeLabel(data.type)"
@@ -524,7 +571,7 @@ onMounted(() => {
           </Column>
 
           <!-- Category -->
-          <Column field="category_id" header="Category" :sortable="true" class="min-w-[140px]">
+          <Column field="category_id" header="Categoría" :sortable="true" class="min-w-[140px]">
             <template #body="{ data }">
               <span class="text-sm text-surface-600 dark:text-surface-500">
                 {{ categoryName(data) }}
@@ -533,7 +580,7 @@ onMounted(() => {
           </Column>
 
           <!-- Difficulty -->
-          <Column field="difficulty" header="Difficulty" :sortable="true" class="min-w-[110px]">
+          <Column field="difficulty" header="Dificultad" :sortable="true" class="min-w-[110px]">
             <template #body="{ data }">
               <Tag
                 :value="getDifficultyLabel(data.difficulty)"
@@ -544,7 +591,7 @@ onMounted(() => {
           </Column>
 
           <!-- Course -->
-          <Column field="course_id" header="Course" class="min-w-[160px]">
+          <Column field="course_id" header="Curso / Categoría" class="min-w-[160px]">
             <template #body="{ data }">
               <span class="text-sm text-surface-600 dark:text-surface-500">
                 {{ courseName(data) }}
@@ -553,7 +600,7 @@ onMounted(() => {
           </Column>
 
           <!-- Created -->
-          <Column field="created_at" header="Created" :sortable="true" class="min-w-[120px]">
+          <Column field="created_at" header="Creado" :sortable="true" class="min-w-[120px]">
             <template #body="{ data }">
               <span class="text-sm text-surface-500 dark:text-surface-500">
                 {{ formatDate(data.created_at) }}
@@ -562,7 +609,7 @@ onMounted(() => {
           </Column>
 
           <!-- Actions -->
-          <Column header="Actions" class="min-w-[100px]">
+          <Column header="Acciones" class="min-w-[100px]">
             <template #body="{ data }">
               <div class="flex items-center gap-1">
                 <Button
@@ -571,7 +618,7 @@ onMounted(() => {
                   text
                   rounded
                   size="small"
-                  v-tooltip.top="'Edit'"
+                  v-tooltip.top="'Editar'"
                   @click="navigateToEdit(data.id)"
                 />
                 <Button
@@ -580,7 +627,7 @@ onMounted(() => {
                   text
                   rounded
                   size="small"
-                  v-tooltip.top="'Delete'"
+                  v-tooltip.top="'Eliminar'"
                   @click="confirmDelete(data.id, data.question_text || data.text)"
                 />
               </div>
