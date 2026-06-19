@@ -365,26 +365,21 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
     >
       <!-- Brand / Logo -->
       <div class="flex h-16 items-center gap-3 border-b border-surface-200 dark:border-surface-200 px-4 shrink-0">
-        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-white shrink-0">
+        <div class="flex items-center justify-center shrink-0">
           <svg
-            class="h-5 w-5"
+            class="h-7 w-7 text-blue-500 dark:text-blue-400"
             viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            fill="currentColor"
           >
-            <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-            <path d="M6 12v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5" />
+            <path d="M4 20V4h4l8 11V4h4v16h-4L8 9v11H4z" />
           </svg>
         </div>
         <Transition name="brand-fade">
           <span
             v-show="!sidebarCollapsed || isMobile"
-            class="text-lg font-bold tracking-tight text-surface-900 dark:text-surface-950 whitespace-nowrap"
+            class="text-[19px] font-bold tracking-widest text-surface-900 dark:text-white uppercase whitespace-nowrap"
           >
-            Nexora
+            NEXORA
           </span>
         </Transition>
         <!-- Collapse toggle (desktop only) -->
@@ -549,18 +544,13 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
           >
             <i :class="mobileSidebarOpen ? 'pi pi-times' : 'pi pi-bars'" class="text-lg" />
           </button>
-          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white">
+          <div class="flex items-center justify-center">
             <svg
-              class="h-4 w-4"
+              class="h-6 w-6 text-blue-500 dark:text-blue-400"
               viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              fill="currentColor"
             >
-              <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-              <path d="M6 12v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5" />
+              <path d="M4 20V4h4l8 11V4h4v16h-4L8 9v11H4z" />
             </svg>
           </div>
         </div>
