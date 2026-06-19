@@ -333,7 +333,6 @@ a:hover {
 
 /* Heading defaults */
 h1, h2, h3, h4, h5, h6 {
-  color: var(--color-text);
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.02em;
@@ -435,4 +434,96 @@ h1, h2, h3, h4, h5, h6 {
 .input:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* =============================================
+   Premium Toast Notifications
+   ============================================= */
+.p-toast {
+  width: 26rem !important;
+  opacity: 0.95;
+}
+
+.p-toast .p-toast-message {
+  background: var(--color-surface-0) !important;
+  border: 1px solid var(--color-surface-200) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  color: var(--color-text) !important;
+}
+
+.dark .p-toast .p-toast-message {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+  color: #f8fafc !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-success {
+  border-left: 4px solid #10b981 !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-error {
+  border-left: 4px solid #ef4444 !important;
+}
+
+.p-toast .p-toast-message .p-toast-message-content {
+  padding: 1rem 1.25rem !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 1rem !important;
+}
+
+.p-toast-message-icon {
+  font-size: 1.25rem !important;
+  margin-top: 2px !important;
+}
+
+.p-toast-message-success .p-toast-message-icon {
+  color: #10b981 !important;
+}
+
+.p-toast-message-error .p-toast-message-icon {
+  color: #ef4444 !important;
+}
+
+.p-toast-message-text {
+  margin: 0 !important;
+  flex: 1 !important;
+}
+
+.p-toast-summary {
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  margin-bottom: 4px !important;
+  display: block !important;
+}
+
+.p-toast-detail {
+  font-size: 13px !important;
+  color: var(--color-surface-500) !important;
+  margin: 0 !important;
+}
+
+.dark .p-toast-detail {
+  color: var(--color-surface-400) !important;
+}
+
+.p-toast-icon-close {
+  color: var(--color-surface-400) !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  border-radius: 50% !important;
+  transition: background-color 0.2s !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.p-toast-icon-close:hover {
+  background-color: var(--color-surface-100) !important;
+}
+
+.dark .p-toast-icon-close:hover {
+  background-color: var(--color-surface-200) !important;
 }

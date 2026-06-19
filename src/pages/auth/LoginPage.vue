@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'primevue/usetoast'
@@ -25,6 +25,38 @@ const password = ref('')
 const rememberMe = ref(false)
 const submitted = ref(false)
 const loading = computed(() => authStore.loading)
+
+// ---------------------------------------------------------------------------
+// Dark Mode
+// ---------------------------------------------------------------------------
+const isDark = ref(false)
+
+function initDarkMode() {
+  const stored = localStorage.getItem('nexora-theme')
+  if (stored === 'dark') {
+    isDark.value = true
+    document.documentElement.classList.add('dark')
+  } else if (stored === 'light') {
+    isDark.value = false
+    document.documentElement.classList.remove('dark')
+  } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    isDark.value = true
+    document.documentElement.classList.add('dark')
+  } else {
+    isDark.value = false
+    document.documentElement.classList.remove('dark')
+  }
+}
+
+function toggleDarkMode() {
+  isDark.value = !isDark.value
+  document.documentElement.classList.toggle('dark', isDark.value)
+  localStorage.setItem('nexora-theme', isDark.value ? 'dark' : 'light')
+}
+
+onMounted(() => {
+  initDarkMode()
+})
 
 // ---------------------------------------------------------------------------
 // Validation
@@ -257,6 +289,16 @@ if (rememberedEmail) {
          RIGHT PANE — Login form (Card on light grey bg)
     ========================================================== -->
     <div class="w-full lg:w-[55%] flex items-center justify-center p-6 lg:p-12 relative z-0">
+      
+      <!-- Theme Toggle Button -->
+      <button 
+        @click="toggleDarkMode" 
+        class="absolute top-6 right-6 lg:top-8 lg:right-8 flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:shadow-md transition-all z-10"
+        :aria-label="isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+      >
+        <i :class="isDark ? 'pi pi-sun' : 'pi pi-moon'" class="text-lg"></i>
+      </button>
+
       <!-- Card Container -->
       <div class="w-full max-w-[440px] bg-white dark:bg-[#1e293b] rounded-2xl p-10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-slate-800">
 
@@ -414,5 +456,28 @@ if (rememberedEmail) {
 :deep(.p-inputtext:enabled:focus) {
   box-shadow: none !important;
   border-color: transparent !important;
+}
+
+/* Checkbox visibility */
+:deep(.p-checkbox-box) {
+  border: 2px solid #cbd5e1 !important; /* slate-300 */
+  background-color: #ffffff !important;
+  transition: all 0.2s;
+  border-radius: 4px;
+}
+:deep(.p-checkbox-box.p-highlight) {
+  background-color: #1d4ed8 !important; /* blue-700 */
+  border-color: #1d4ed8 !important;
+}
+.dark :deep(.p-checkbox-box) {
+  border-color: #475569 !important; /* slate-600 */
+  background-color: #0f172a !important; /* slate-900 */
+}
+.dark :deep(.p-checkbox-box.p-highlight) {
+  background-color: #3b82f6 !important; /* blue-500 */
+  border-color: #3b82f6 !important;
+}
+:deep(.p-checkbox-icon) {
+  color: white !important;
 }
 </style>
