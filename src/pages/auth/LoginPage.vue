@@ -104,7 +104,7 @@ if (rememberedEmail) {
 </script>
 
 <template>
-  <div class="flex h-screen overflow-hidden bg-[#f8fafc]">
+  <div class="flex h-screen overflow-hidden bg-[#f8fafc] dark:bg-[#0f172a]">
     <!-- =========================================================
          LEFT PANE — Dark blue gradient with branding
     ========================================================== -->
@@ -256,14 +256,14 @@ if (rememberedEmail) {
     <!-- =========================================================
          RIGHT PANE — Login form (Card on light grey bg)
     ========================================================== -->
-    <div class="w-full lg:w-[55%] flex items-center justify-center p-6 lg:p-12">
+    <div class="w-full lg:w-[55%] flex items-center justify-center p-6 lg:p-12 relative z-0">
       <!-- Card Container -->
-      <div class="w-full max-w-[440px] bg-white rounded-2xl p-10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100">
+      <div class="w-full max-w-[440px] bg-white dark:bg-[#1e293b] rounded-2xl p-10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-slate-800">
 
         <!-- Header -->
         <div class="text-center mb-8">
-          <h2 class="text-[28px] font-bold text-gray-900 mb-2">Bienvenido de nuevo</h2>
-          <p class="text-gray-500 text-[15px]">Inicia sesión para continuar en Nexora</p>
+          <h2 class="text-[28px] font-bold text-gray-900 dark:text-white mb-2">Bienvenido de nuevo</h2>
+          <p class="text-gray-500 dark:text-gray-400 text-[15px]">Inicia sesión para continuar en Nexora</p>
           
           <div class="flex items-center justify-center gap-2 mt-8 mb-6">
             <!-- Small N logo -->
@@ -272,9 +272,9 @@ if (rememberedEmail) {
               <div class="absolute right-0 top-0 w-1.5 h-full bg-blue-800 rounded-sm"></div>
               <div class="absolute left-1 top-0 w-1.5 h-[115%] bg-blue-600 rounded-sm origin-top-left transform -rotate-[32deg] shadow-sm"></div>
             </div>
-            <span class="text-[22px] font-bold tracking-widest text-[#0f172a] mt-1">NEXORA</span>
+            <span class="text-[22px] font-bold tracking-widest text-[#0f172a] dark:text-white mt-1">NEXORA</span>
           </div>
-          <div class="w-full h-px bg-gray-100"></div>
+          <div class="w-full h-px bg-gray-100 dark:bg-slate-700/50"></div>
         </div>
 
         <!-- Server Error -->
@@ -287,17 +287,17 @@ if (rememberedEmail) {
 
           <!-- Email -->
           <div>
-            <label for="login-email" class="block text-sm font-semibold text-gray-700 mb-1.5">
+            <label for="login-email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Correo electrónico
             </label>
             <div class="relative">
-              <i class="pi pi-user absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 z-10 text-[15px]"></i>
+              <i class="pi pi-user absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 z-10 text-[15px]"></i>
               <InputText
                 id="login-email"
                 v-model="email"
                 type="email"
                 placeholder="ejemplo@empresa.com"
-                :class="['w-full pl-[38px] py-3 rounded-lg border text-[15px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors', errors.email ? 'border-red-400' : 'border-gray-200 hover:border-gray-300']"
+                :class="['w-full pl-[38px] py-3 rounded-lg border text-[15px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white dark:bg-[#0f172a] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500', errors.email ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600']"
                 autocomplete="email"
               />
             </div>
@@ -308,11 +308,11 @@ if (rememberedEmail) {
 
           <!-- Password -->
           <div>
-            <label for="login-password" class="block text-sm font-semibold text-gray-700 mb-1.5">
+            <label for="login-password" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Contraseña
             </label>
             <div class="relative">
-              <i class="pi pi-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 z-10 text-[15px]"></i>
+              <i class="pi pi-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 z-10 text-[15px]"></i>
               <Password
                 id="login-password"
                 v-model="password"
@@ -320,7 +320,7 @@ if (rememberedEmail) {
                 :feedback="false"
                 toggle-mask
                 class="w-full"
-                :input-class="`w-full pl-[38px] pr-10 py-3 rounded-lg border text-[15px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors ${errors.password ? 'border-red-400' : 'border-gray-200 hover:border-gray-300'}`"
+                :input-class="`w-full pl-[38px] pr-10 py-3 rounded-lg border text-[15px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white dark:bg-[#0f172a] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 ${errors.password ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'}`"
                 autocomplete="current-password"
               />
             </div>
@@ -333,13 +333,13 @@ if (rememberedEmail) {
           <div class="flex items-center justify-between pt-1">
             <div class="flex items-center gap-2">
               <Checkbox id="remember" v-model="rememberMe" binary inputId="remember" />
-              <label for="remember" class="text-[13px] font-medium text-gray-600 select-none cursor-pointer">
+              <label for="remember" class="text-[13px] font-medium text-gray-600 dark:text-gray-400 select-none cursor-pointer">
                 Recordarme
               </label>
             </div>
             <RouterLink
               :to="{ name: 'ForgotPassword' }"
-              class="text-[13px] text-blue-600 hover:text-blue-700 font-semibold hover:underline"
+              class="text-[13px] text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold hover:underline"
             >
               ¿Olvidaste tu contraseña?
             </RouterLink>
@@ -358,16 +358,16 @@ if (rememberedEmail) {
         <!-- OR Divider -->
         <div class="relative my-7">
           <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-gray-200"></div>
+            <div class="w-full border-t border-gray-200 dark:border-slate-700"></div>
           </div>
           <div class="relative flex justify-center text-[10px] uppercase tracking-widest font-bold">
-            <span class="bg-white px-4 text-gray-400">o continúa con</span>
+            <span class="bg-white dark:bg-[#1e293b] px-4 text-gray-400 dark:text-gray-500">o continúa con</span>
           </div>
         </div>
 
         <!-- Social Login -->
         <div class="flex gap-3 mb-8">
-          <button type="button" class="flex-1 flex items-center justify-center gap-2.5 py-2.5 px-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-[13px] font-semibold text-gray-700">
+          <button type="button" class="flex-1 flex items-center justify-center gap-2.5 py-2.5 px-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-[13px] font-semibold text-gray-700 dark:text-gray-300">
             <svg class="w-4 h-4" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -376,7 +376,7 @@ if (rememberedEmail) {
             </svg>
             Google
           </button>
-          <button type="button" class="flex-1 flex items-center justify-center gap-2.5 py-2.5 px-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-[13px] font-semibold text-gray-700">
+          <button type="button" class="flex-1 flex items-center justify-center gap-2.5 py-2.5 px-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-[13px] font-semibold text-gray-700 dark:text-gray-300">
             <svg class="w-4 h-4" viewBox="0 0 24 24">
               <rect x="1" y="1" width="10" height="10" fill="#F25022"/>
               <rect x="13" y="1" width="10" height="10" fill="#7FBA00"/>
@@ -388,7 +388,7 @@ if (rememberedEmail) {
         </div>
 
         <!-- Register Link -->
-        <p class="text-center text-gray-500 text-[13px] mb-1">
+        <p class="text-center text-gray-500 dark:text-gray-400 text-[13px] mb-1">
           ¿No tienes una cuenta?
           <RouterLink :to="{ name: 'Register' }" class="text-blue-600 hover:text-blue-800 font-bold hover:underline ml-1">
             Solicita acceso
@@ -397,7 +397,7 @@ if (rememberedEmail) {
       </div>
 
       <!-- Security Message outside the card -->
-      <div class="absolute bottom-8 flex items-center justify-center gap-2 text-gray-400 text-[11px] font-medium">
+      <div class="absolute bottom-8 flex items-center justify-center gap-2 text-gray-400 dark:text-gray-500 text-[11px] font-medium">
         <i class="pi pi-shield text-[13px]"></i>
         <span>Tu información está protegida con encriptación de nivel empresarial.</span>
       </div>
